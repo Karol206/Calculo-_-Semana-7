@@ -2,13 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Resolver Desigualdades</title>
+  <title>Desigualdades con Gráfico</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: Arial;
       background-color: #f0f8ff;
       padding: 20px;
-      max-width: 600px;
+      max-width: 700px;
       margin: auto;
     }
     input, select, button {
@@ -22,11 +23,14 @@
       padding: 10px;
       border-left: 4px solid #007acc;
     }
+    canvas {
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
 
-  <h2>Resolución de Desigualdades</h2>
+  <h2>Resolver Desigualdades y Graficar</h2>
 
   <label>Tipo de desigualdad:</label>
   <select id="tipo">
@@ -55,7 +59,11 @@
 
   <div id="resultado"></div>
 
+  <canvas id="grafico" width="600" height="300"></canvas>
+
   <script>
+    let chart;
+
     function resolver() {
       const tipo = document.getElementById('tipo').value;
       const a = parseFloat(document.getElementById('a').value);
@@ -64,16 +72,36 @@
       const simbolo = document.getElementById('desigualdad').value;
       let res = '';
 
+      let labels = [];
+      let valores = [];
+
+      for (let x = -10; x <= 10; x += 0.1) {
+        x = parseFloat(x.toFixed(2));
+        labels.push(x);
+        let y;
+        if (tipo === 'lineal') {
+          y = a * x + b;
+        } else {
+          y = a * x * x + b * x + c;
+        }
+        valores.push(y);
+      }
+
+      // Resolver desigualdad
       if (tipo === 'lineal') {
-        const x = -b / a;
-        res = `Solución: x ${simbolo} ${x.toFixed(2)} (si a ≠ 0)`;
-      } else if (tipo === 'cuadratica') {
-        const discriminante = b * b - 4 * a * c;
-        if (discriminante < 0) {
+        if (a !== 0) {
+          const x = -b / a;
+          res = `Solución: x ${simbolo} ${x.toFixed(2)}`;
+        } else {
+          res = b + ' ' + simbolo + ' 0';
+        }
+      } else {
+        const D = b * b - 4 * a * c;
+        if (D < 0) {
           res = 'No hay soluciones reales (la parábola no corta el eje x).';
         } else {
-          const x1 = (-b + Math.sqrt(discriminante)) / (2 * a);
-          const x2 = (-b - Math.sqrt(discriminante)) / (2 * a);
+          const x1 = (-b + Math.sqrt(D)) / (2 * a);
+          const x2 = (-b - Math.sqrt(D)) / (2 * a);
           const xmin = Math.min(x1, x2).toFixed(2);
           const xmax = Math.max(x1, x2).toFixed(2);
           if (a > 0) {
@@ -85,7 +113,38 @@
           }
         }
       }
+
       document.getElementById('resultado').innerText = res;
+
+      // Mostrar gráfico
+      if (chart) chart.destroy();
+      const ctx = document.getElementById('grafico').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: tipo === 'lineal' ? 'f(x) = ax + b' : 'f(x) = ax² + bx + c',
+            data: valores,
+            borderColor: 'blue',
+            fill: false,
+            pointRadius: 0,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              title: { display: true, text: 'x' }
+            },
+            y: {
+              title: { display: true, text: 'f(x)' },
+              beginAtZero: false
+            }
+          }
+        }
+      });
     }
   </script>
 
