@@ -1,75 +1,128 @@
-<script>
-  let chart;
-
-  function calcularDominioRango() {
-    const exprInput = document.getElementById('funcion').value;
-    const intervalo = document.getElementById('intervalo').value;
-    const partes = intervalo.split(',').map(Number);
-
-    if (partes.length !== 2 || isNaN(partes[0]) || isNaN(partes[1])) {
-      alert("Intervalo inválido. Usa el formato: -10,10");
-      return;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora de Dominio y Rango</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      max-width: 700px;
+      margin: auto;
+      padding: 30px;
     }
+    input, button {
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+    }
+    #resultado {
+      background-color: #e8f5e9;
+      border-left: 5px solid #4caf50;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    canvas {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
 
-    const [xInicio, xFin] = partes;
-    const expr = math.compile(exprInput);
+  <h2>Calculadora de Dominio y Rango</h2>
 
-    let xVals = [], yVals = [], dominio = [], rango = [];
+  <label>Función (usa x):</label>
+  <input id="funcion" value="1/(x-2)">
 
-    for (let x = xInicio; x <= xFin; x += 0.1) {
+  <label>Intervalo de análisis (ej. -10,10):</label>
+  <input id="intervalo" value="-10,10">
+
+  <button onclick="calcularDominioRango()">Calcular dominio y rango</button>
+
+  <div id="resultado"></div>
+  <canvas id="grafico" width="600" height="300"></canvas>
+
+  <script>
+    let chart;
+
+    function calcularDominioRango() {
+      const exprInput = document.getElementById('funcion').value;
+      const intervalo = document.getElementById('intervalo').value;
+      const partes = intervalo.split(',').map(Number);
+
+      if (partes.length !== 2 || isNaN(partes[0]) || isNaN(partes[1])) {
+        alert("Intervalo inválido. Usa el formato: -10,10");
+        return;
+      }
+
+      const [xInicio, xFin] = partes;
+      let expr;
       try {
-        const y = expr.evaluate({x});
-        if (isFinite(y)) {
-          xVals.push(x.toFixed(2));
-          yVals.push(y);
-          dominio.push(x);
-          rango.push(y);
-        }
+        expr = math.compile(exprInput);
       } catch (e) {
-        // Mostrar error si es necesario
-        console.log("Error:", e.message);
+        document.getElementById('resultado').innerHTML = "❌ Error en la función: " + e.message;
+        return;
       }
-    }
 
-    if (rango.length === 0) {
-      document.getElementById('resultado').innerHTML = "No se pudo calcular ningún valor válido. Revisa la función o el intervalo.";
-      return;
-    }
+      let xVals = [], yVals = [], dominio = [], rango = [];
 
-    const minY = Math.min(...rango).toFixed(2);
-    const maxY = Math.max(...rango).toFixed(2);
-    const minX = Math.min(...dominio).toFixed(2);
-    const maxX = Math.max(...dominio).toFixed(2);
-
-    const resultado = `
-      <strong>Dominio aproximado:</strong> [${minX}, ${maxX}]<br>
-      <strong>Rango aproximado:</strong> [${minY}, ${maxY}]
-    `;
-    document.getElementById('resultado').innerHTML = resultado;
-
-    // Gráfico
-    if (chart) chart.destroy();
-    const ctx = document.getElementById('grafico').getContext('2d');
-    chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: xVals,
-        datasets: [{
-          label: 'f(x)',
-          data: yVals,
-          borderColor: 'green',
-          borderWidth: 2,
-          pointRadius: 0,
-          fill: false
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: { title: { display: true, text: 'x' }},
-          y: { title: { display: true, text: 'f(x)' }}
+      for (let x = xInicio; x <= xFin; x += 0.1) {
+        try {
+          const y = expr.evaluate({x});
+          if (isFinite(y)) {
+            xVals.push(x.toFixed(2));
+            yVals.push(y);
+            dominio.push(x);
+            rango.push(y);
+          }
+        } catch (e) {
+          // Valores indefinidos como división por cero
         }
       }
-    });
-  }
-</script>
+
+      if (rango.length === 0) {
+        document.getElementById('resultado').innerHTML = "❌ No se pudo calcular ningún valor. Revisa la función o el intervalo.";
+        return;
+      }
+
+      const minY = Math.min(...rango).toFixed(2);
+      const maxY = Math.max(...rango).toFixed(2);
+      const minX = Math.min(...dominio).toFixed(2);
+      const maxX = Math.max(...dominio).toFixed(2);
+
+      const resultado = `
+        <strong>Dominio aproximado:</strong> [${minX}, ${maxX}]<br>
+        <strong>Rango aproximado:</strong> [${minY}, ${maxY}]
+      `;
+      document.getElementById('resultado').innerHTML = resultado;
+
+      // Dibujar gráfico
+      if (chart) chart.destroy();
+      const ctx = document.getElementById('grafico').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: xVals,
+          datasets: [{
+            label: 'f(x)',
+            data: yVals,
+            borderColor: 'blue',
+            fill: false,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { title: { display: true, text: 'x' } },
+            y: { title: { display: true, text: 'f(x)' } }
+          }
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
