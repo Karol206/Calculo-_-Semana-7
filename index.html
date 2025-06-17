@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -72,3 +71,43 @@
       }
 
       let minY = Math.min(...rango).toFixed(2);
+      let maxY = Math.max(...rango).toFixed(2);
+      let minX = Math.min(...dominio).toFixed(2);
+      let maxX = Math.max(...dominio).toFixed(2);
+
+      const resultado = `
+        <strong>Dominio aproximado:</strong> [${minX}, ${maxX}]<br>
+        <strong>Rango aproximado:</strong> [${minY}, ${maxY}]<br>
+        <strong>Nota:</strong> El cálculo es numérico y se basa en valores dentro del intervalo indicado.<br>
+        <strong>Sugerencia:</strong> Evita divisiones por cero o raíces cuadradas de negativos si no deseas discontinuidades.
+      `;
+      document.getElementById('resultado').innerHTML = resultado;
+
+      if (chart) chart.destroy();
+      const ctx = document.getElementById('grafico').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: xVals,
+          datasets: [{
+            label: 'f(x)',
+            data: yVals,
+            borderColor: 'green',
+            borderWidth: 2,
+            pointRadius: 0,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { title: { display: true, text: 'x' }},
+            y: { title: { display: true, text: 'f(x)' }}
+          }
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
