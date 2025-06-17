@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Resolver Desigualdades</title>
+  <style>
+    body {
+      font-family: Arial;
+      background-color: #f0f8ff;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    input, select, button {
+      padding: 8px;
+      margin: 6px 0;
+      width: 100%;
+    }
+    #resultado {
+      margin-top: 15px;
+      background: #e6f7ff;
+      padding: 10px;
+      border-left: 4px solid #007acc;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Resolución de Desigualdades</h2>
+
+  <label>Tipo de desigualdad:</label>
+  <select id="tipo">
+    <option value="lineal">Lineal (ax + b > 0)</option>
+    <option value="cuadratica">Cuadrática (ax² + bx + c > 0)</option>
+  </select>
+
+  <label>Coeficiente a:</label>
+  <input type="number" id="a">
+
+  <label>Coeficiente b:</label>
+  <input type="number" id="b">
+
+  <label>Coeficiente c (solo para cuadráticas):</label>
+  <input type="number" id="c" value="0">
+
+  <label>Desigualdad:</label>
+  <select id="desigualdad">
+    <option value=">">&gt;</option>
+    <option value=">=">&ge;</option>
+    <option value="<">&lt;</option>
+    <option value="<=">&le;</option>
+  </select>
+
+  <button onclick="resolver()">Resolver</button>
+
+  <div id="resultado"></div>
+
+  <script>
+    function resolver() {
+      const tipo = document.getElementById('tipo').value;
+      const a = parseFloat(document.getElementById('a').value);
+      const b = parseFloat(document.getElementById('b').value);
+      const c = parseFloat(document.getElementById('c').value);
+      const simbolo = document.getElementById('desigualdad').value;
+      let res = '';
+
+      if (tipo === 'lineal') {
+        const x = -b / a;
+        res = `Solución: x ${simbolo} ${x.toFixed(2)} (si a ≠ 0)`;
+      } else if (tipo === 'cuadratica') {
+        const discriminante = b * b - 4 * a * c;
+        if (discriminante < 0) {
+          res = 'No hay soluciones reales (la parábola no corta el eje x).';
+        } else {
+          const x1 = (-b + Math.sqrt(discriminante)) / (2 * a);
+          const x2 = (-b - Math.sqrt(discriminante)) / (2 * a);
+          const xmin = Math.min(x1, x2).toFixed(2);
+          const xmax = Math.max(x1, x2).toFixed(2);
+          if (a > 0) {
+            if (simbolo === '>') res = `Solución: x < ${xmin} o x > ${xmax}`;
+            if (simbolo === '<') res = `Solución: ${xmin} < x < ${xmax}`;
+          } else {
+            if (simbolo === '>') res = `Solución: ${xmin} < x < ${xmax}`;
+            if (simbolo === '<') res = `Solución: x < ${xmin} o x > ${xmax}`;
+          }
+        }
+      }
+      document.getElementById('resultado').innerText = res;
+    }
+  </script>
+
+</body>
+</html>
