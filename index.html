@@ -2,127 +2,48 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Calculadora de Dominio y Rango</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+  <title>Dominio y Rango de una Función</title>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f2f5;
-      max-width: 700px;
-      margin: auto;
-      padding: 30px;
-    }
-    input, button {
-      padding: 10px;
-      margin-top: 10px;
-      width: 100%;
-    }
-    #resultado {
-      background-color: #e8f5e9;
-      border-left: 5px solid #4caf50;
-      padding: 15px;
-      margin-top: 20px;
-    }
-    canvas {
-      margin-top: 20px;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f0f4f8; }
+    input, button { padding: 8px; font-size: 16px; margin: 5px 0; width: 100%; }
+    #plot { width: 100%; height: 400px; }
   </style>
 </head>
 <body>
-
   <h2>Calculadora de Dominio y Rango</h2>
+  <label>Escribe una función de x (por ejemplo: <code>Math.sin(x)</code> o <code>x*x - 2</code>):</label>
+  <input id="funcInput" type="text" placeholder="Ej: Math.sqrt(x)">
+  <button onclick="graficarFuncion()">Graficar y Calcular</button>
 
-  <label>Función (usa x):</label>
-  <input id="funcion" value="1/(x-2)">
-
-  <label>Intervalo de análisis (ej. -10,10):</label>
-  <input id="intervalo" value="-10,10">
-
-  <button onclick="calcularDominioRango()">Calcular dominio y rango</button>
-
-  <div id="resultado"></div>
-  <canvas id="grafico" width="600" height="300"></canvas>
+  <div id="plot"></div>
+  <p><strong>Dominio:</strong> <span id="dominio"></span></p>
+  <p><strong>Rango (estimado):</strong> <span id="rango"></span></p>
 
   <script>
-    let chart;
+    function graficarFuncion() {
+      const expr = document.getElementById("funcInput").value;
+      const xVals = [], yVals = [];
 
-    function calcularDominioRango() {
-      const exprInput = document.getElementById('funcion').value;
-      const intervalo = document.getElementById('intervalo').value;
-      const partes = intervalo.split(',').map(Number);
-
-      if (partes.length !== 2 || isNaN(partes[0]) || isNaN(partes[1])) {
-        alert("Intervalo inválido. Usa el formato: -10,10");
-        return;
-      }
-
-      const [xInicio, xFin] = partes;
-      let expr;
-      try {
-        expr = math.compile(exprInput);
-      } catch (e) {
-        document.getElementById('resultado').innerHTML = "❌ Error en la función: " + e.message;
-        return;
-      }
-
-      let xVals = [], yVals = [], dominio = [], rango = [];
-
-      for (let x = xInicio; x <= xFin; x += 0.1) {
+      for (let x = -50; x <= 50; x += 0.5) {
         try {
-          const y = expr.evaluate({x});
+          const y = eval(expr.replace(/x/g, `(${x})`));
           if (isFinite(y)) {
-            xVals.push(x.toFixed(2));
+            xVals.push(x);
             yVals.push(y);
-            dominio.push(x);
-            rango.push(y);
           }
-        } catch (e) {
-          // Valores indefinidos como división por cero
-        }
+        } catch {}
       }
 
-      if (rango.length === 0) {
-        document.getElementById('resultado').innerHTML = "❌ No se pudo calcular ningún valor. Revisa la función o el intervalo.";
-        return;
-      }
+      const trace = { x: xVals, y: yVals, mode: 'lines', type: 'scatter' };
+      Plotly.newPlot("plot", [trace], { margin: { t: 20 } });
 
-      const minY = Math.min(...rango).toFixed(2);
-      const maxY = Math.max(...rango).toFixed(2);
-      const minX = Math.min(...dominio).toFixed(2);
-      const maxX = Math.max(...dominio).toFixed(2);
-
-      const resultado = `
-        <strong>Dominio aproximado:</strong> [${minX}, ${maxX}]<br>
-        <strong>Rango aproximado:</strong> [${minY}, ${maxY}]
-      `;
-      document.getElementById('resultado').innerHTML = resultado;
-
-      // Dibujar gráfico
-      if (chart) chart.destroy();
-      const ctx = document.getElementById('grafico').getContext('2d');
-      chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: xVals,
-          datasets: [{
-            label: 'f(x)',
-            data: yVals,
-            borderColor: 'blue',
-            fill: false,
-            pointRadius: 0
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: { title: { display: true, text: 'x' } },
-            y: { title: { display: true, text: 'f(x)' } }
-          }
-        }
-      });
+      // Calcular dominio y rango estimado
+      const dominio = `[${Math.min(...xVals).toFixed(2)}, ${Math.max(...xVals).toFixed(2)}]`;
+      const rango = `[${Math.min(...yVals).toFixed(2)}, ${Math.max(...yVals).toFixed(2)}]`;
+      document.getElementById("dominio").innerText = dominio;
+      document.getElementById("rango").innerText = rango;
     }
   </script>
-
 </body>
 </html>
