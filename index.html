@@ -1,131 +1,75 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Dominio y Rango - Funciones</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body {
-      font-family: Arial;
-      max-width: 600px;
-      margin: auto;
-      padding: 20px;
-      background-color: #f7f9fc;
+<script>
+  let chart;
+
+  function calcularDominioRango() {
+    const exprInput = document.getElementById('funcion').value;
+    const intervalo = document.getElementById('intervalo').value;
+    const partes = intervalo.split(',').map(Number);
+
+    if (partes.length !== 2 || isNaN(partes[0]) || isNaN(partes[1])) {
+      alert("Intervalo inválido. Usa el formato: -10,10");
+      return;
     }
-    select, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-    }
-    #info {
-      margin-top: 20px;
-      background-color: #e8f5e9;
-      border-left: 5px solid #4caf50;
-      padding: 10px;
-    }
-    canvas {
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
 
-  <h2>Dominio y Rango de Funciones</h2>
+    const [xInicio, xFin] = partes;
+    const expr = math.compile(exprInput);
 
-  <label>Selecciona una función:</label>
-  <select id="funcion">
-    <option value="x*x">f(x) = x²</option>
-    <option value="1/(x-2)">f(x) = 1 / (x - 2)</option>
-    <option value="Math.sqrt(x+4)">f(x) = √(x + 4)</option>
-    <option value="Math.abs(x)">f(x) = |x|</option>
-    <option value="Math.log(x)">f(x) = ln(x)</option>
-  </select>
+    let xVals = [], yVals = [], dominio = [], rango = [];
 
-  <button onclick="analizar()">Ver dominio, rango y gráfica</button>
-
-  <div id="info"></div>
-  <canvas id="grafico" width="600" height="300"></canvas>
-
-  <script>
-    let chart;
-
-    function analizar() {
-      const seleccion = document.getElementById("funcion").value;
-      let funcionTexto = "";
-      let dominio = "";
-      let rango = "";
-
-      switch (seleccion) {
-        case "x*x":
-          funcionTexto = "f(x) = x²";
-          dominio = "Todos los reales (ℝ)";
-          rango = "[0, ∞)";
-          break;
-        case "1/(x-2)":
-          funcionTexto = "f(x) = 1 / (x - 2)";
-          dominio = "ℝ, excepto x = 2";
-          rango = "ℝ, excepto y = 0";
-          break;
-        case "Math.sqrt(x+4)":
-          funcionTexto = "f(x) = √(x + 4)";
-          dominio = "x ≥ -4";
-          rango = "y ≥ 0";
-          break;
-        case "Math.abs(x)":
-          funcionTexto = "f(x) = |x|";
-          dominio = "Todos los reales (ℝ)";
-          rango = "y ≥ 0";
-          break;
-        case "Math.log(x)":
-          funcionTexto = "f(x) = ln(x)";
-          dominio = "x > 0";
-          rango = "Todos los reales (ℝ)";
-          break;
-      }
-
-      document.getElementById("info").innerHTML = `
-        <strong>Función:</strong> ${funcionTexto}<br>
-        <strong>Dominio:</strong> ${dominio}<br>
-        <strong>Rango:</strong> ${rango}
-      `;
-
-      // Graficar
-      const f = new Function("x", `return ${seleccion}`);
-      let x_vals = [];
-      let y_vals = [];
-      for (let x = -20; x <= 20; x += 0.1) {
-        try {
-          const y = f(x);
-          if (isFinite(y)) {
-            x_vals.push(x.toFixed(2));
-            y_vals.push(y);
-          }
-        } catch (e) {}
-      }
-
-      if (chart) chart.destroy();
-      const ctx = document.getElementById("grafico").getContext("2d");
-      chart = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: x_vals,
-          datasets: [{
-            label: funcionTexto,
-            data: y_vals,
-            borderColor: "blue",
-            fill: false,
-            pointRadius: 0
-          }]
-        },
-        options: {
-          scales: {
-            x: { title: { display: true, text: "x" } },
-            y: { title: { display: true, text: "f(x)" } }
-          }
+    for (let x = xInicio; x <= xFin; x += 0.1) {
+      try {
+        const y = expr.evaluate({x});
+        if (isFinite(y)) {
+          xVals.push(x.toFixed(2));
+          yVals.push(y);
+          dominio.push(x);
+          rango.push(y);
         }
-      });
+      } catch (e) {
+        // Mostrar error si es necesario
+        console.log("Error:", e.message);
+      }
     }
-  </script>
 
-</body>
-</html>
+    if (rango.length === 0) {
+      document.getElementById('resultado').innerHTML = "No se pudo calcular ningún valor válido. Revisa la función o el intervalo.";
+      return;
+    }
+
+    const minY = Math.min(...rango).toFixed(2);
+    const maxY = Math.max(...rango).toFixed(2);
+    const minX = Math.min(...dominio).toFixed(2);
+    const maxX = Math.max(...dominio).toFixed(2);
+
+    const resultado = `
+      <strong>Dominio aproximado:</strong> [${minX}, ${maxX}]<br>
+      <strong>Rango aproximado:</strong> [${minY}, ${maxY}]
+    `;
+    document.getElementById('resultado').innerHTML = resultado;
+
+    // Gráfico
+    if (chart) chart.destroy();
+    const ctx = document.getElementById('grafico').getContext('2d');
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: xVals,
+        datasets: [{
+          label: 'f(x)',
+          data: yVals,
+          borderColor: 'green',
+          borderWidth: 2,
+          pointRadius: 0,
+          fill: false
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { title: { display: true, text: 'x' }},
+          y: { title: { display: true, text: 'f(x)' }}
+        }
+      }
+    });
+  }
+</script>
