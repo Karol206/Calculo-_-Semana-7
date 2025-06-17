@@ -2,27 +2,26 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Dominio y Rango de una Función</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+  <title>Dominio y Rango - Funciones</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: Arial;
-      padding: 20px;
-      max-width: 700px;
+      max-width: 600px;
       margin: auto;
-      background-color: #f4f8fc;
+      padding: 20px;
+      background-color: #f7f9fc;
     }
-    input, button {
-      padding: 8px;
+    select, button {
       width: 100%;
-      margin: 6px 0;
-    }
-    #resultado {
-      background: #e7f4ff;
       padding: 10px;
-      border-left: 4px solid #007acc;
-      margin-top: 15px;
+      margin-top: 10px;
+    }
+    #info {
+      margin-top: 20px;
+      background-color: #e8f5e9;
+      border-left: 5px solid #4caf50;
+      padding: 10px;
     }
     canvas {
       margin-top: 20px;
@@ -31,78 +30,97 @@
 </head>
 <body>
 
-  <h2>Calculadora de Dominio y Rango</h2>
+  <h2>Dominio y Rango de Funciones</h2>
 
-  <label>Función (usa x):</label>
-  <input type="text" id="funcion" placeholder="Ejemplo: 1/(x-2), sqrt(x), x^2 - 4">
+  <label>Selecciona una función:</label>
+  <select id="funcion">
+    <option value="x*x">f(x) = x²</option>
+    <option value="1/(x-2)">f(x) = 1 / (x - 2)</option>
+    <option value="Math.sqrt(x+4)">f(x) = √(x + 4)</option>
+    <option value="Math.abs(x)">f(x) = |x|</option>
+    <option value="Math.log(x)">f(x) = ln(x)</option>
+  </select>
 
-  <label>Intervalo de análisis:</label>
-  <input type="text" id="intervalo" placeholder="Ejemplo: -10,10">
+  <button onclick="analizar()">Ver dominio, rango y gráfica</button>
 
-  <button onclick="calcularDominioRango()">Calcular dominio y rango</button>
-
-  <div id="resultado"></div>
+  <div id="info"></div>
   <canvas id="grafico" width="600" height="300"></canvas>
 
   <script>
     let chart;
 
-    function calcularDominioRango() {
-      const exprInput = document.getElementById('funcion').value;
-      const intervalo = document.getElementById('intervalo').value.split(',').map(Number);
-      const xInicio = intervalo[0];
-      const xFin = intervalo[1];
+    function analizar() {
+      const seleccion = document.getElementById("funcion").value;
+      let funcionTexto = "";
+      let dominio = "";
+      let rango = "";
 
-      const expr = math.compile(exprInput);
-      let xVals = [], yVals = [], dominio = [], rango = [];
-
-      for (let x = xInicio; x <= xFin; x += 0.1) {
-        try {
-          const y = expr.evaluate({x});
-          if (isFinite(y)) {
-            xVals.push(x.toFixed(2));
-            yVals.push(y);
-            dominio.push(x);
-            rango.push(y);
-          }
-        } catch (e) {
-          // Ignorar valores no definidos
-        }
+      switch (seleccion) {
+        case "x*x":
+          funcionTexto = "f(x) = x²";
+          dominio = "Todos los reales (ℝ)";
+          rango = "[0, ∞)";
+          break;
+        case "1/(x-2)":
+          funcionTexto = "f(x) = 1 / (x - 2)";
+          dominio = "ℝ, excepto x = 2";
+          rango = "ℝ, excepto y = 0";
+          break;
+        case "Math.sqrt(x+4)":
+          funcionTexto = "f(x) = √(x + 4)";
+          dominio = "x ≥ -4";
+          rango = "y ≥ 0";
+          break;
+        case "Math.abs(x)":
+          funcionTexto = "f(x) = |x|";
+          dominio = "Todos los reales (ℝ)";
+          rango = "y ≥ 0";
+          break;
+        case "Math.log(x)":
+          funcionTexto = "f(x) = ln(x)";
+          dominio = "x > 0";
+          rango = "Todos los reales (ℝ)";
+          break;
       }
 
-      let minY = Math.min(...rango).toFixed(2);
-      let maxY = Math.max(...rango).toFixed(2);
-      let minX = Math.min(...dominio).toFixed(2);
-      let maxX = Math.max(...dominio).toFixed(2);
-
-      const resultado = `
-        <strong>Dominio aproximado:</strong> [${minX}, ${maxX}]<br>
-        <strong>Rango aproximado:</strong> [${minY}, ${maxY}]<br>
-        <strong>Nota:</strong> El cálculo es numérico y se basa en valores dentro del intervalo indicado.<br>
-        <strong>Sugerencia:</strong> Evita divisiones por cero o raíces cuadradas de negativos si no deseas discontinuidades.
+      document.getElementById("info").innerHTML = `
+        <strong>Función:</strong> ${funcionTexto}<br>
+        <strong>Dominio:</strong> ${dominio}<br>
+        <strong>Rango:</strong> ${rango}
       `;
-      document.getElementById('resultado').innerHTML = resultado;
+
+      // Graficar
+      const f = new Function("x", `return ${seleccion}`);
+      let x_vals = [];
+      let y_vals = [];
+      for (let x = -20; x <= 20; x += 0.1) {
+        try {
+          const y = f(x);
+          if (isFinite(y)) {
+            x_vals.push(x.toFixed(2));
+            y_vals.push(y);
+          }
+        } catch (e) {}
+      }
 
       if (chart) chart.destroy();
-      const ctx = document.getElementById('grafico').getContext('2d');
+      const ctx = document.getElementById("grafico").getContext("2d");
       chart = new Chart(ctx, {
-        type: 'line',
+        type: "line",
         data: {
-          labels: xVals,
+          labels: x_vals,
           datasets: [{
-            label: 'f(x)',
-            data: yVals,
-            borderColor: 'green',
-            borderWidth: 2,
-            pointRadius: 0,
-            fill: false
+            label: funcionTexto,
+            data: y_vals,
+            borderColor: "blue",
+            fill: false,
+            pointRadius: 0
           }]
         },
         options: {
-          responsive: true,
           scales: {
-            x: { title: { display: true, text: 'x' }},
-            y: { title: { display: true, text: 'f(x)' }}
+            x: { title: { display: true, text: "x" } },
+            y: { title: { display: true, text: "f(x)" } }
           }
         }
       });
