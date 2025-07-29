@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Derivadas por Definición + Gráfica</title>
+  <title>Derivadas por Definición</title>
 
-  <!-- Estilos -->
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -16,7 +15,7 @@
 
     .container {
       max-width: 800px;
-      background-color: white;
+      background: white;
       margin: auto;
       padding: 30px;
       border-radius: 12px;
@@ -25,7 +24,6 @@
 
     h1 {
       text-align: center;
-      margin-bottom: 10px;
     }
 
     input {
@@ -56,14 +54,120 @@
     }
 
     canvas {
-      margin-top: 30px;
+      margin-top: 40px;
     }
   </style>
 
-  <!-- Librerías -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1
+    <h1>🧮 Derivadas Paso a Paso por Definición</h1>
+    <p>Ingresa una función en <strong>x</strong>:</p>
+    <input type="text" id="funcion" placeholder="Ejemplo: x^2 + 2*x" />
+    <button onclick="resolver()">Resolver</button>
+
+    <div id="resultado"></div>
+    <canvas id="grafico"></canvas>
+  </div>
+
+  <script>
+    function resolver() {
+      const entrada = document.getElementById("funcion").value;
+      const resultado = document.getElementById("resultado");
+      const delta = "h";
+      const x = "x";
+
+      try {
+        // Paso 1: f(x)
+        const fx = math.simplify(entrada).toString();
+        const fxh = math.simplify(entrada.replaceAll("x", `(x + h)`)).toString();
+
+        const pasos = [];
+        pasos.push(`<strong>Paso 1:</strong> Definición: f'(x) = lim(h→0) [f(x + h) - f(x)] / h`);
+        pasos.push(`<strong>Paso 2:</strong> f(x + h) = ${fxh}`);
+        pasos.push(`<strong>Paso 3:</strong> f(x) = ${fx}`);
+        
+        const num = `(${fxh}) - (${fx})`;
+        const paso4 = math.simplify(num).toString();
+        pasos.push(`<strong>Paso 4:</strong> Numerador simplificado: ${paso4}`);
+        
+        const cociente = `(${paso4}) / h`;
+        const paso5 = math.simplify(cociente).toString();
+        pasos.push(`<strong>Paso 5:</strong> Cociente: (${paso5})`);
+
+        // Sustituimos h = 0 (límite)
+        const derivada = math.simplify(paso5.replaceAll("h", "0")).toString();
+        pasos.push(`<strong>Paso 6:</strong> Límite cuando h → 0: f'(x) = ${derivada}`);
+
+        resultado.innerHTML = pasos.join("<br><br>");
+
+        // Gráfica
+        graficar(entrada, derivada);
+      } catch (e) {
+        resultado.innerHTML = `<span style="color:red;">⚠️ Error en la función ingresada. Usa expresiones válidas como x^2, x^3, 2*x, etc.</span>`;
+      }
+    }
+
+    function graficar(f, df) {
+      const ctx = document.getElementById("grafico").getContext("2d");
+
+      const x_vals = [];
+      const y_vals = [];
+      const y_derivadas = [];
+
+      for (let x = -10; x <= 10; x += 0.5) {
+        try {
+          const scope = { x };
+          x_vals.push(x);
+          y_vals.push(math.evaluate(f, scope));
+          y_derivadas.push(math.evaluate(df, scope));
+        } catch (e) {
+          x_vals.push(x);
+          y_vals.push(null);
+          y_derivadas.push(null);
+        }
+      }
+
+      if (window.miGrafico) {
+        window.miGrafico.destroy();
+      }
+
+      window.miGrafico = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: x_vals,
+          datasets: [
+            {
+              label: 'f(x)',
+              data: y_vals,
+              borderColor: 'blue',
+              borderWidth: 2,
+              fill: false
+            },
+            {
+              label: "f'(x)",
+              data: y_derivadas,
+              borderColor: 'red',
+              borderWidth: 2,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              title: { display: true, text: 'x' }
+            },
+            y: {
+              title: { display: true, text: 'y' }
+            }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
