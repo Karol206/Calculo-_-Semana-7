@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Derivador Paso a Paso</title>
-  <!-- Estilo embebido -->
+
+  <!-- Estilo integrado -->
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -60,7 +61,7 @@
     <div id="resultado"></div>
   </div>
 
-  <!-- Script embebido -->
+  <!-- Código JavaScript embebido -->
   <script>
     function resolverDerivada() {
       const input = document.getElementById("funcion").value;
@@ -88,7 +89,7 @@
 
         resultadoDiv.innerHTML = pasos.join("<br><br>");
       } catch (error) {
-        resultadoDiv.innerHTML = `<span style="color: red;">⚠️ Error en la función ingresada. Asegúrate de usar notación válida como x^2, x^3, etc.</span>`;
+        resultadoDiv.innerHTML = `<span style="color: red;">⚠️ Error en la función ingresada. Usa notación válida como x^2, x^3, sin(x), ln(x), etc.</span>`;
       }
     }
   </script>
