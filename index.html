@@ -1,25 +1,26 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Derivadas por Definición</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Derivada por definición - Paso a paso</title>
 
+  <!-- Estilos -->
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #eef2f3;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f2f5;
       margin: 0;
       padding: 20px;
     }
 
     .container {
-      max-width: 800px;
-      background: white;
+      max-width: 850px;
       margin: auto;
+      background-color: white;
       padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 12px rgba(0,0,0,0.15);
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
     }
 
     h1 {
@@ -28,15 +29,17 @@
 
     input {
       width: 100%;
-      padding: 12px;
+      padding: 10px;
       font-size: 18px;
       margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
 
     button {
-      padding: 12px 20px;
+      padding: 10px 20px;
       font-size: 16px;
-      background-color: #007BFF;
+      background-color: #007bff;
       color: white;
       border: none;
       border-radius: 6px;
@@ -48,8 +51,8 @@
     }
 
     #resultado {
-      margin-top: 20px;
-      font-size: 18px;
+      margin-top: 25px;
+      font-size: 17px;
       line-height: 1.6;
     }
 
@@ -58,105 +61,103 @@
     }
   </style>
 
+  <!-- Librerías -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>🧮 Derivadas Paso a Paso por Definición</h1>
-    <p>Ingresa una función en <strong>x</strong>:</p>
-    <input type="text" id="funcion" placeholder="Ejemplo: x^2 + 2*x" />
-    <button onclick="resolver()">Resolver</button>
+    <h1>🧮 Derivadas por definición</h1>
+    <p>Ingresa una función en <b>x</b> (usa notación como <code>x^2 + 3*x</code>):</p>
+    <input type="text" id="funcion" placeholder="Ejemplo: x^3 + 2*x" />
+    <button onclick="resolverDerivada()">Resolver derivada</button>
 
     <div id="resultado"></div>
-    <canvas id="grafico"></canvas>
+    <canvas id="grafico" height="300"></canvas>
   </div>
 
   <script>
-    function resolver() {
-      const entrada = document.getElementById("funcion").value;
+    function resolverDerivada() {
+      const fInput = document.getElementById("funcion").value;
       const resultado = document.getElementById("resultado");
-      const delta = "h";
-      const x = "x";
+      const h = "h";
+      let pasos = [];
 
       try {
-        // Paso 1: f(x)
-        const fx = math.simplify(entrada).toString();
-        const fxh = math.simplify(entrada.replaceAll("x", `(x + h)`)).toString();
+        // f(x) y f(x+h)
+        const fx = math.parse(fInput).toString();
+        const fxh_raw = fInput.replace(/x/g, `(x + ${h})`);
+        const fxh = math.simplify(fxh_raw).toString();
 
-        const pasos = [];
-        pasos.push(`<strong>Paso 1:</strong> Definición: f'(x) = lim(h→0) [f(x + h) - f(x)] / h`);
-        pasos.push(`<strong>Paso 2:</strong> f(x + h) = ${fxh}`);
-        pasos.push(`<strong>Paso 3:</strong> f(x) = ${fx}`);
-        
-        const num = `(${fxh}) - (${fx})`;
-        const paso4 = math.simplify(num).toString();
-        pasos.push(`<strong>Paso 4:</strong> Numerador simplificado: ${paso4}`);
-        
-        const cociente = `(${paso4}) / h`;
-        const paso5 = math.simplify(cociente).toString();
-        pasos.push(`<strong>Paso 5:</strong> Cociente: (${paso5})`);
+        pasos.push(`<strong>Paso 1:</strong> Definición formal:<br>f'(x) = lim(h → 0) [(f(x + h) - f(x)) / h]`);
+        pasos.push(`<strong>Paso 2:</strong> Sustituimos:<br>f(x + h) = ${fxh}<br>f(x) = ${fx}`);
+        pasos.push(`<strong>Paso 3:</strong> Calculamos el numerador:<br>(${fxh}) - (${fx})`);
 
-        // Sustituimos h = 0 (límite)
-        const derivada = math.simplify(paso5.replaceAll("h", "0")).toString();
-        pasos.push(`<strong>Paso 6:</strong> Límite cuando h → 0: f'(x) = ${derivada}`);
+        const numerador = math.simplify(`(${fxh}) - (${fx})`).toString();
+        pasos.push(`<strong>Paso 4:</strong> Simplificamos el numerador:<br>${numerador}`);
+
+        const cociente = math.simplify(`(${numerador}) / h`).toString();
+        pasos.push(`<strong>Paso 5:</strong> Dividimos entre h:<br>${cociente}`);
+
+        const derivada = math.simplify(cociente.replaceAll("h", "0")).toString();
+        pasos.push(`<strong>Paso 6:</strong> Límite cuando h → 0:<br><b>f'(x) = ${derivada}</b>`);
 
         resultado.innerHTML = pasos.join("<br><br>");
 
-        // Gráfica
-        graficar(entrada, derivada);
-      } catch (e) {
-        resultado.innerHTML = `<span style="color:red;">⚠️ Error en la función ingresada. Usa expresiones válidas como x^2, x^3, 2*x, etc.</span>`;
+        graficarFuncion(fInput, derivada);
+      } catch (error) {
+        resultado.innerHTML = `<span style="color: red;">⚠️ Error: función no válida. Usa x^2, x^3, 2*x, etc.</span>`;
       }
     }
 
-    function graficar(f, df) {
+    function graficarFuncion(funcion, derivada) {
       const ctx = document.getElementById("grafico").getContext("2d");
 
       const x_vals = [];
       const y_vals = [];
-      const y_derivadas = [];
+      const y_deriv = [];
 
       for (let x = -10; x <= 10; x += 0.5) {
         try {
           const scope = { x };
           x_vals.push(x);
-          y_vals.push(math.evaluate(f, scope));
-          y_derivadas.push(math.evaluate(df, scope));
-        } catch (e) {
+          y_vals.push(math.evaluate(funcion, scope));
+          y_deriv.push(math.evaluate(derivada, scope));
+        } catch {
           x_vals.push(x);
           y_vals.push(null);
-          y_derivadas.push(null);
+          y_deriv.push(null);
         }
       }
 
-      if (window.miGrafico) {
-        window.miGrafico.destroy();
-      }
+      if (window.miGrafico) window.miGrafico.destroy();
 
       window.miGrafico = new Chart(ctx, {
-        type: 'line',
+        type: "line",
         data: {
           labels: x_vals,
           datasets: [
             {
-              label: 'f(x)',
+              label: "f(x)",
               data: y_vals,
-              borderColor: 'blue',
-              borderWidth: 2,
-              fill: false
+              borderColor: "blue",
+              fill: false,
+              tension: 0.2
             },
             {
               label: "f'(x)",
-              data: y_derivadas,
-              borderColor: 'red',
-              borderWidth: 2,
-              fill: false
+              data: y_deriv,
+              borderColor: "red",
+              fill: false,
+              tension: 0.2
             }
           ]
         },
         options: {
           responsive: true,
+          plugins: {
+            legend: { position: 'top' }
+          },
           scales: {
             x: {
               title: { display: true, text: 'x' }
