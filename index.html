@@ -1,139 +1,96 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Dominio y Rango</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Derivador Paso a Paso</title>
+  <!-- Estilo embebido -->
   <style>
     body {
-      font-family: sans-serif;
-      background: #f4f6f9;
-      padding: 30px;
-      max-width: 800px;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      background: white;
       margin: auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    input, button {
-      padding: 10px;
+
+    input {
       width: 100%;
-      margin-top: 10px;
+      padding: 10px;
+      margin: 10px 0;
+      font-size: 18px;
+    }
+
+    button {
+      padding: 10px 20px;
       font-size: 16px;
+      cursor: pointer;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 6px;
     }
-    h1 { color: #2c3e50; }
-    #resultado, #tabla-valores {
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #resultado {
       margin-top: 20px;
-      padding: 15px;
-      background: #ffffff;
-      border-left: 5px solid #2980b9;
-    }
-    table {
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 6px 10px;
-      text-align: center;
+      font-size: 18px;
     }
   </style>
+
+  <!-- Librería math.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
 </head>
 <body>
+  <div class="container">
+    <h1>🧮 Derivador Paso a Paso</h1>
+    <p>Ingresa una función para derivar respecto a <strong>x</strong>:</p>
+    <input type="text" id="funcion" placeholder="Ejemplo: x^3 + 2x^2 - x" />
+    <button onclick="resolverDerivada()">Resolver</button>
+    <div id="resultado"></div>
+  </div>
 
-  <h1>Calculadora de Dominio y Rango</h1>
-
-  <label>Función en x (por ejemplo: 1/(x-3), x^2, sqrt(x+1))</label>
-  <input id="funcion" value="sqrt(x+2)">
-
-  <label>Intervalo (ej: -10,10)</label>
-  <input id="intervalo" value="-10,10">
-
-  <button onclick="calcular()">Calcular</button>
-
-  <div id="resultado"></div>
-  <div id="tabla-valores"></div>
-  <canvas id="grafico" width="600" height="300"></canvas>
-
+  <!-- Script embebido -->
   <script>
-    let chart;
+    function resolverDerivada() {
+      const input = document.getElementById("funcion").value;
+      const resultadoDiv = document.getElementById("resultado");
+      resultadoDiv.innerHTML = "";
 
-    function calcular() {
-      const funcion = document.getElementById("funcion").value;
-      const intervaloTexto = document.getElementById("intervalo").value;
-      const [a, b] = intervaloTexto.split(",").map(Number);
-
-      let expr;
       try {
-        expr = math.compile(funcion);
-      } catch (e) {
-        document.getElementById('resultado').innerHTML = "❌ Error en la función.";
-        return;
+        const expr = math.parse(input);
+        const derivada = math.derivative(expr, 'x');
+        
+        const pasos = [];
+
+        // Paso 1: Mostrar función original
+        pasos.push(`<strong>Paso 1:</strong> Función original: f(x) = ${expr.toString()}`);
+
+        // Paso 2: Derivar
+        pasos.push(`<strong>Paso 2:</strong> Aplicamos reglas de derivación.`);
+
+        // Paso 3: Mostrar derivada
+        pasos.push(`<strong>Paso 3:</strong> Derivada: f'(x) = ${derivada.toString()}`);
+
+        // Paso 4: Simplificar
+        const simplificada = math.simplify(derivada);
+        pasos.push(`<strong>Paso 4:</strong> Simplificamos la derivada: f'(x) = ${simplificada.toString()}`);
+
+        resultadoDiv.innerHTML = pasos.join("<br><br>");
+      } catch (error) {
+        resultadoDiv.innerHTML = `<span style="color: red;">⚠️ Error en la función ingresada. Asegúrate de usar notación válida como x^2, x^3, etc.</span>`;
       }
-
-      let xVals = [], yVals = [], tabla = "";
-      let dominio = [], rango = [];
-
-      tabla += "<table><tr><th>x</th><th>f(x)</th></tr>";
-
-      for (let x = a; x <= b; x += 0.5) {
-        let y;
-        try {
-          y = expr.evaluate({ x });
-          if (isFinite(y)) {
-            dominio.push(x);
-            rango.push(y);
-            xVals.push(x.toFixed(2));
-            yVals.push(y);
-            tabla += `<tr><td>${x.toFixed(2)}</td><td>${y.toFixed(2)}</td></tr>`;
-          }
-        } catch (e) {
-          // f(x) indefinido para este valor de x
-        }
-      }
-
-      tabla += "</table>";
-      document.getElementById("tabla-valores").innerHTML = tabla;
-
-      if (rango.length === 0) {
-        document.getElementById("resultado").innerHTML = "❌ No se pudo calcular la función en ese intervalo.";
-        return;
-      }
-
-      const minX = Math.min(...dominio).toFixed(2);
-      const maxX = Math.max(...dominio).toFixed(2);
-      const minY = Math.min(...rango).toFixed(2);
-      const maxY = Math.max(...rango).toFixed(2);
-
-      document.getElementById("resultado").innerHTML = `
-        <strong>Dominio aproximado:</strong> [${minX}, ${maxX}]<br>
-        <strong>Rango aproximado:</strong> [${minY}, ${maxY}]
-      `;
-
-      // Dibujar gráfico
-      if (chart) chart.destroy();
-      const ctx = document.getElementById("grafico").getContext("2d");
-      chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: xVals,
-          datasets: [{
-            label: 'f(x)',
-            data: yVals,
-            borderColor: 'red',
-            borderWidth: 2,
-            fill: false,
-            pointRadius: 0
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: { title: { display: true, text: 'x' } },
-            y: { title: { display: true, text: 'f(x)' } }
-          }
-        }
-      });
     }
   </script>
-
 </body>
-</h
+</html>
