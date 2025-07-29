@@ -1,45 +1,88 @@
 <!DOCTYPE html>
-<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Derivación por Definición + Gráfica</title>
-<style>body{font-family:sans-serif;background:#f5f5f5;padding:20px} .box{max-width:800px;margin:auto;padding:20px;background:#fff;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.1);} input{width:100%;padding:10px;font-size:18px;margin-bottom: }button{padding:10px 20px;font-size:16px;background:#007bff;color:#fff;border:none;border-radius:6px;cursor:pointer;}button:hover{background:#0056b3;} #resultado{margin-top:20px;font-size:17px;line-height:1.5;} canvas{margin-top:30px}</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head><body><div class="box"><h1>🧮 Derivación por Definición</h1>
-<p>Introduce una función en <b>x</b>, ejemplo: <code>x^2 + 3*x</code></p>
-<input type="text" id="funcion" placeholder="Ejemplo: x^2 + 3*x">
-<button onclick="resolver()">Derivar + Graficar</button>
-<div id="resultado"></div>
-<canvas id="grafico" height="300"></canvas></div>
-<script>
-function resolver(){
-  const entrada = document.getElementById("funcion").value;
-  const res = document.getElementById("resultado");
-  const h="h", pasos=[];
-  try {
-    const fx = math.simplify(entrada).toString();
-    const fxh = math.simplify(entrada.replaceAll("x", "(x + h)")).toString();
-    pasos.push("Paso 1: f'(x) = lim(h→0) [f(x+h) − f(x)] / h");
-    pasos.push("Paso 2: f(x+h) = "+fxh);
-    pasos.push("Paso 3: f(x) = "+fx);
-    pasos.push("Paso 4: Numerador = "+fxh+" − "+fx+" = "+math.simplify("("+fxh+") - ("+fx+")"));
-    const num = math.simplify("("+fxh+") - ("+fx+")").toString();
-    pasos.push("Paso 5: Cociente = "+num+" / h = "+math.simplify("("+num+")/h"));
-    const coc = math.simplify("("+num+")/h").toString();
-    const deriv = math.simplify(coc.replaceAll("h","0")).toString();
-    pasos.push("Paso 6: Límite h→0 → f'(x) = "+deriv);
-    res.innerHTML = pasos.map(p=>"<strong>"+p+"</strong>").join("<br><br>");
-    graficar(entrada, deriv);
-  } catch(e){
-    res.innerHTML = "<span style='color:red;'>Error, función inválida. Usa notación como x^2, 2*x, etc.</span>";
-  }
-}
-function graficar(f, fder){
-  const ctx=document.getElementById("grafico").getContext("2d");
-  const xs=[], ys=[], ys2=[];
-  for(let x=-10;x<=10;x+=0.5){
-    try{ys.push(math.evaluate(f,{x})); ys2.push(math.evaluate(fder,{x})); xs.push(x);}catch{ys.push(null);ys2.push(null);xs.push(x);}
-  }
-  if(window.chart) window.chart.destroy();
-  window.chart = new Chart(ctx,{type:"line",data:{labels:xs,datasets:[{label:"f(x)",data:ys,borderColor:"blue"},{label:"f'(x)",data:ys2,borderColor:"red"}]}, options:{responsive:true}});
-}
-</script>
-</body></html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Derivadas por Definición</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+    .contenedor { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, button { width: 100%; padding: 10px; font-size: 18px; margin-top: 10px; }
+    button { background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    #resultado { margin-top: 20px; font-size: 17px; }
+    canvas { margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <div class="contenedor">
+    <h1>🧮 Derivada por Definición</h1>
+    <input type="text" id="funcion" placeholder="Ejemplo: x^2 + 3*x" />
+    <button onclick="resolver()">Resolver derivada</button>
+    <div id="resultado"></div>
+    <canvas id="grafico" height="300"></canvas>
+  </div>
+
+  <script>
+    function resolver() {
+      const f = document.getElementById("funcion").value;
+      const h = 'h';
+      const resultado = document.getElementById("resultado");
+      const pasos = [];
+
+      try {
+        const fx = math.simplify(f).toString();
+        const fxh = math.simplify(f.replaceAll("x", "(x + h)")).toString();
+        pasos.push(`<b>Paso 1:</b> Definición de derivada: f'(x) = lim(h→0) [(f(x+h) - f(x)) / h]`);
+        pasos.push(`<b>Paso 2:</b> f(x + h) = ${fxh}`);
+        pasos.push(`<b>Paso 3:</b> f(x) = ${fx}`);
+        const num = math.simplify(`(${fxh}) - (${fx})`).toString();
+        pasos.push(`<b>Paso 4:</b> Numerador simplificado: ${num}`);
+        const coc = math.simplify(`(${num}) / h`).toString();
+        pasos.push(`<b>Paso 5:</b> Cociente: (${num}) / h = ${coc}`);
+        const deriv = math.simplify(coc.replaceAll("h", "0")).toString();
+        pasos.push(`<b>Paso 6:</b> Límite cuando h → 0: <b>f'(x) = ${deriv}</b>`);
+        resultado.innerHTML = pasos.join("<br><br>");
+        graficar(f, deriv);
+      } catch (e) {
+        resultado.innerHTML = `<span style="color:red">⚠️ Error: función inválida</span>`;
+      }
+    }
+
+    function graficar(f, fderiv) {
+      const ctx = document.getElementById("grafico").getContext("2d");
+      const xs = [], ys = [], ys2 = [];
+      for (let x = -10; x <= 10; x += 0.5) {
+        try {
+          xs.push(x);
+          ys.push(math.evaluate(f, {x}));
+          ys2.push(math.evaluate(fderiv, {x}));
+        } catch {
+          ys.push(null); ys2.push(null); xs.push(x);
+        }
+      }
+
+      if (window.chart) window.chart.destroy();
+
+      window.chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: xs,
+          datasets: [
+            { label: 'f(x)', data: ys, borderColor: 'blue', fill: false },
+            { label: "f'(x)", data: ys2, borderColor: 'red', fill: false }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { title: { display: true, text: 'x' } },
+            y: { title: { display: true, text: 'y' } }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
