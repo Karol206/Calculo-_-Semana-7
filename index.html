@@ -3,40 +3,46 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Derivador Paso a Paso</title>
+  <title>Derivadas por Definición + Gráfica</title>
 
-  <!-- Estilo integrado -->
+  <!-- Estilos -->
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
+      background-color: #eef2f3;
+      margin: 0;
       padding: 20px;
     }
 
     .container {
-      max-width: 600px;
-      background: white;
+      max-width: 800px;
+      background-color: white;
       margin: auto;
-      padding: 20px;
+      padding: 30px;
       border-radius: 12px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 12px rgba(0,0,0,0.15);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
     }
 
     input {
       width: 100%;
-      padding: 10px;
-      margin: 10px 0;
+      padding: 12px;
       font-size: 18px;
+      margin-bottom: 10px;
     }
 
     button {
-      padding: 10px 20px;
+      padding: 12px 20px;
       font-size: 16px;
-      cursor: pointer;
       background-color: #007BFF;
       color: white;
       border: none;
       border-radius: 6px;
+      cursor: pointer;
     }
 
     button:hover {
@@ -46,52 +52,18 @@
     #resultado {
       margin-top: 20px;
       font-size: 18px;
+      line-height: 1.6;
+    }
+
+    canvas {
+      margin-top: 30px;
     }
   </style>
 
-  <!-- Librería math.js -->
+  <!-- Librerías -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>🧮 Derivador Paso a Paso</h1>
-    <p>Ingresa una función para derivar respecto a <strong>x</strong>:</p>
-    <input type="text" id="funcion" placeholder="Ejemplo: x^3 + 2x^2 - x" />
-    <button onclick="resolverDerivada()">Resolver</button>
-    <div id="resultado"></div>
-  </div>
-
-  <!-- Código JavaScript embebido -->
-  <script>
-    function resolverDerivada() {
-      const input = document.getElementById("funcion").value;
-      const resultadoDiv = document.getElementById("resultado");
-      resultadoDiv.innerHTML = "";
-
-      try {
-        const expr = math.parse(input);
-        const derivada = math.derivative(expr, 'x');
-        
-        const pasos = [];
-
-        // Paso 1: Mostrar función original
-        pasos.push(`<strong>Paso 1:</strong> Función original: f(x) = ${expr.toString()}`);
-
-        // Paso 2: Derivar
-        pasos.push(`<strong>Paso 2:</strong> Aplicamos reglas de derivación.`);
-
-        // Paso 3: Mostrar derivada
-        pasos.push(`<strong>Paso 3:</strong> Derivada: f'(x) = ${derivada.toString()}`);
-
-        // Paso 4: Simplificar
-        const simplificada = math.simplify(derivada);
-        pasos.push(`<strong>Paso 4:</strong> Simplificamos la derivada: f'(x) = ${simplificada.toString()}`);
-
-        resultadoDiv.innerHTML = pasos.join("<br><br>");
-      } catch (error) {
-        resultadoDiv.innerHTML = `<span style="color: red;">⚠️ Error en la función ingresada. Usa notación válida como x^2, x^3, sin(x), ln(x), etc.</span>`;
-      }
-    }
-  </script>
-</body>
-</html>
+    <h1
