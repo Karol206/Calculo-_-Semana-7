@@ -2,53 +2,67 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Derivada por Definición Paso a Paso</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
+  <title>Derivadas Paso a Paso</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js"></script>
   <style>
-    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-    input, button { font-size: 16px; padding: 8px; margin: 10px 0; }
-    #pasos { background: white; padding: 15px; border-radius: 10px; }
+    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
+    input, button { font-size: 16px; padding: 8px; }
+    #output { background: #fff; padding: 15px; margin-top: 20px; border-radius: 8px; }
+    .step { margin-bottom: 12px; }
+    code { background: #eee; padding: 2px 5px; border-radius: 4px; }
   </style>
 </head>
 <body>
 
-<h2>Derivada por Definición (Paso a Paso)</h2>
-<input type="text" id="funcion" placeholder="Ej: 2*x^2">
-<button onclick="resolver()">Resolver Derivada</button>
+<h2>Derivada usando definición (paso a paso)</h2>
+<p>Ingresa una función como: <code>2*x^2</code>, <code>sin(x)</code>, <code>x^3 + 5*x</code></p>
 
-<div id="pasos"></div>
+<input id="funcion" type="text" placeholder="Ej: 2*x^2">
+<button onclick="resolver()">Resolver</button>
+
+<div id="output"></div>
 
 <script>
   function resolver() {
-    const entrada = document.getElementById("funcion").value;
-    const pasos = document.getElementById("pasos");
-    pasos.innerHTML = "";
+    const funcionInput = document.getElementById("funcion").value;
+    const output = document.getElementById("output");
+    output.innerHTML = "";
 
     try {
-      // Paso 1
-      const f = math.simplify(entrada).toString();
-      pasos.innerHTML += `<p><strong>Paso 1:</strong> f(x) = ${f}</p>`;
+      // Validación
+      if (!funcionInput.includes("x")) {
+        throw new Error("La función debe contener la variable x.");
+      }
 
-      // Paso 2
-      const fx_dx = entrada.replace(/x/g, "(x + h)");
-      const fx_menos_f = `(${fx_dx}) - (${entrada})`;
-      pasos.innerHTML += `<p><strong>Paso 2:</strong> f(x+h) = ${fx_dx}</p>`;
-      pasos.innerHTML += `<p><strong>Paso 3:</strong> [f(x+h) - f(x)] / h = [${fx_dx} - (${entrada})]/h</p>`;
+      // Paso 1: f(x)
+      const fx = math.simplify(funcionInput).toString();
+      output.innerHTML += `<div class="step"><strong>Paso 1:</strong> f(x) = <code>${fx}</code></div>`;
 
-      // Paso 4: simplificar numerador
-      const numerador = math.simplify(fx_menos_f).toString();
-      pasos.innerHTML += `<p><strong>Paso 4:</strong> Simplificando el numerador: ${numerador}</p>`;
+      // Paso 2: f(x + h)
+      const f_xh_node = math.parse(funcionInput).transform(function (node) {
+        if (node.isSymbolNode && node.name === 'x') {
+          return math.parse('(x + h)');
+        }
+        return node;
+      });
+      const f_xh = math.simplify(f_xh_node).toString();
+      output.innerHTML += `<div class="step"><strong>Paso 2:</strong> f(x + h) = <code>${f_xh}</code></div>`;
 
-      // Paso 5: cociente / h
+      // Paso 3: Diferencia
+      const numerador = math.simplify(`(${f_xh}) - (${fx})`).toString();
+      output.innerHTML += `<div class="step"><strong>Paso 3:</strong> f(x + h) - f(x) = <code>${numerador}</code></div>`;
+
+      // Paso 4: Cociente
       const cociente = math.simplify(`(${numerador}) / h`).toString();
-      pasos.innerHTML += `<p><strong>Paso 5:</strong> Dividiendo por h: ${cociente}</p>`;
+      output.innerHTML += `<div class="step"><strong>Paso 4:</strong> (f(x + h) - f(x)) / h = <code>${cociente}</code></div>`;
 
-      // Paso 6: límite cuando h → 0
-      const derivada = math.derivative(entrada, 'x').toString();
-      pasos.innerHTML += `<p><strong>Paso 6:</strong> Derivada final: ${derivada}</p>`;
+      // Paso 5: Límite cuando h → 0
+      const derivada = math.simplify(cociente.replace(/h/g, '0')).toString();
+      const derivadaReal = math.derivative(funcionInput, 'x').toString();
+      output.innerHTML += `<div class="step"><strong>Paso 5:</strong> Límite cuando h → 0: <code>${derivadaReal}</code></div>`;
 
-    } catch (e) {
-      pasos.innerHTML = `<p style="color: red;">⚠️ Error al procesar la función. Usa formato como: <code>2*x^2</code></p>`;
+    } catch (err) {
+      output.innerHTML = `<div style="color:red;"><strong>Error:</strong> ${err.message}</div>`;
     }
   }
 </script>
