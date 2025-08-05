@@ -126,24 +126,28 @@
             : node
         );
         const fxh_str = fxh.toString();
+        const fxh_exp = math.simplify(fxh_str).toString();
 
-        const diferencia = math.simplify(`(${fxh_str}) - (${fx_str})`);
-        const diferencia_str = diferencia.toString();
+        const diferencia = math.simplify(`(${fxh_str}) - (${fx_str})`).toString();
+        const diferencia_simplificada = math.simplify(diferencia).toString();
 
-        const cociente = math.simplify(`(${diferencia_str}) / h`);
-        const cociente_str = cociente.toString();
+        const cociente = math.simplify(`(${diferencia_simplificada}) / h`).toString();
+        const cociente_simplificado = math.simplify(cociente).toString();
 
         const derivada = math.derivative(entrada, 'x');
         const derivada_str = derivada.toString();
 
         resultado.innerHTML += `<div class="paso">📘 <strong>1)</strong> Fórmula general:<br>f'(x) = lim₍ₕ→0₎ [f(x+h) - f(x)] / h</div>`;
         resultado.innerHTML += `<div class="paso">🧮 <strong>2)</strong> f(x) = <strong>${fx_str}</strong></div>`;
-        resultado.innerHTML += `<div class="paso">➕ <strong>3)</strong> f(x+h) = <strong>${fxh_str}</strong></div>`;
-        resultado.innerHTML += `<div class="paso">➖ <strong>4)</strong> Diferencia: f(x+h) - f(x) = <strong>${diferencia_str}</strong></div>`;
-        resultado.innerHTML += `<div class="paso">➗ <strong>5)</strong> Cociente: [f(x+h) - f(x)] / h = <strong>${cociente_str}</strong></div>`;
-        resultado.innerHTML += `<div class="paso">✅ <strong>6)</strong> Derivada: f'(x) = <strong>${derivada_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">➕ <strong>3)</strong> Sustituimos x por (x+h): f(x+h) = <strong>${fxh_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">🧩 <strong>4)</strong> Expandimos f(x+h): <strong>${fxh_exp}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">➖ <strong>5)</strong> f(x+h) - f(x): <strong>${diferencia}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">🧹 <strong>6)</strong> Simplificamos la diferencia: <strong>${diferencia_simplificada}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">➗ <strong>7)</strong> Dividimos entre h: <strong>${cociente}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">🧼 <strong>8)</strong> Simplificamos el cociente: <strong>${cociente_simplificado}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">📉 <strong>9)</strong> Aplicamos el límite cuando h→0:</div>`;
+        resultado.innerHTML += `<div class="paso">✅ <strong>10)</strong> Resultado final: f'(x) = <strong>${derivada_str}</strong></div>`;
 
-        // Gráfico
         const expr = math.compile(entrada);
         const derivExpr = math.compile(derivada_str);
 
