@@ -2,70 +2,181 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Derivadas Paso a Paso</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.5.0/math.min.js"></script>
+  <title>Derivadas paso a paso</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.1/math.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; }
-    input, button { font-size: 16px; padding: 8px; }
-    #output { background: #fff; padding: 15px; margin-top: 20px; border-radius: 8px; }
-    .step { margin-bottom: 12px; }
-    code { background: #eee; padding: 2px 5px; border-radius: 4px; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right, #f0f4ff, #f8f0ff);
+      padding: 50px 20px;
+      margin: 0;
+    }
+
+    .contenedor {
+      background-color: #ffffff;
+      padding: 35px;
+      max-width: 850px;
+      margin: auto;
+      border-radius: 18px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      border-left: 6px solid #6c63ff;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 25px;
+      font-weight: 700;
+    }
+
+    input, button {
+      font-size: 18px;
+      padding: 12px 16px;
+      margin: 15px 5px 25px 0;
+    }
+
+    input {
+      width: 60%;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      transition: border 0.3s;
+    }
+
+    input:focus {
+      border-color: #6c63ff;
+      outline: none;
+    }
+
+    button {
+      background-color: #6c63ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #574b90;
+    }
+
+    .paso {
+      background-color: #f9f7fc;
+      padding: 16px;
+      border-left: 5px solid #6c63ff;
+      margin-top: 15px;
+      border-radius: 6px;
+      line-height: 1.6;
+    }
+
+    .error {
+      color: #d50000;
+      font-weight: bold;
+    }
+
+    #grafico {
+      margin-top: 40px;
+    }
+
+    code {
+      background: #eee;
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+    }
   </style>
 </head>
 <body>
+  <div class="contenedor">
+    <h1>📘 Derivada por definición</h1>
+    <p>Ingresa la función <strong>f(x)</strong> (ej: <code>x^2 + 3*x</code>):</p>
+    <input type="text" id="funcion" placeholder="Ejemplo: x^2 + 3*x">
+    <button onclick="calcularDerivada()">Resolver</button>
+    <div id="resultado"></div>
+    <div id="grafico"></div>
+  </div>
 
-<h2>Derivada usando definición (paso a paso)</h2>
-<p>Ingresa una función como: <code>2*x^2</code>, <code>sin(x)</code>, <code>x^3 + 5*x</code></p>
+  <script>
+    function calcularDerivada() {
+      const entrada = document.getElementById("funcion").value.trim();
+      const resultado = document.getElementById("resultado");
+      const grafico = document.getElementById("grafico");
+      resultado.innerHTML = "";
+      grafico.innerHTML = "";
 
-<input id="funcion" type="text" placeholder="Ej: 2*x^2">
-<button onclick="resolver()">Resolver</button>
-
-<div id="output"></div>
-
-<script>
-  function resolver() {
-    const funcionInput = document.getElementById("funcion").value;
-    const output = document.getElementById("output");
-    output.innerHTML = "";
-
-    try {
-      // Validación
-      if (!funcionInput.includes("x")) {
-        throw new Error("La función debe contener la variable x.");
+      if (!entrada) {
+        resultado.innerHTML = '<div class="paso error">⚠️ Ingresa una función válida.</div>';
+        return;
       }
 
-      // Paso 1: f(x)
-      const fx = math.simplify(funcionInput).toString();
-      output.innerHTML += `<div class="step"><strong>Paso 1:</strong> f(x) = <code>${fx}</code></div>`;
+      try {
+        const fx = math.parse(entrada);
+        const fx_str = fx.toString();
 
-      // Paso 2: f(x + h)
-      const f_xh_node = math.parse(funcionInput).transform(function (node) {
-        if (node.isSymbolNode && node.name === 'x') {
-          return math.parse('(x + h)');
-        }
-        return node;
-      });
-      const f_xh = math.simplify(f_xh_node).toString();
-      output.innerHTML += `<div class="step"><strong>Paso 2:</strong> f(x + h) = <code>${f_xh}</code></div>`;
+        const fxh = fx.transform(node =>
+          node.isSymbolNode && node.name === "x"
+            ? math.parse("(x + h)")
+            : node
+        );
+        const fxh_str = fxh.toString();
 
-      // Paso 3: Diferencia
-      const numerador = math.simplify(`(${f_xh}) - (${fx})`).toString();
-      output.innerHTML += `<div class="step"><strong>Paso 3:</strong> f(x + h) - f(x) = <code>${numerador}</code></div>`;
+        const diferencia = math.simplify(`(${fxh_str}) - (${fx_str})`);
+        const diferencia_str = diferencia.toString();
 
-      // Paso 4: Cociente
-      const cociente = math.simplify(`(${numerador}) / h`).toString();
-      output.innerHTML += `<div class="step"><strong>Paso 4:</strong> (f(x + h) - f(x)) / h = <code>${cociente}</code></div>`;
+        const cociente = math.simplify(`(${diferencia_str}) / h`);
+        const cociente_str = cociente.toString();
 
-      // Paso 5: Límite cuando h → 0
-      const derivada = math.simplify(cociente.replace(/h/g, '0')).toString();
-      const derivadaReal = math.derivative(funcionInput, 'x').toString();
-      output.innerHTML += `<div class="step"><strong>Paso 5:</strong> Límite cuando h → 0: <code>${derivadaReal}</code></div>`;
+        const derivada = math.derivative(entrada, 'x');
+        const derivada_str = derivada.toString();
 
-    } catch (err) {
-      output.innerHTML = `<div style="color:red;"><strong>Error:</strong> ${err.message}</div>`;
+        resultado.innerHTML += `<div class="paso">1️⃣ Fórmula general:<br>f'(x) = lim₍ₕ→0₎ [f(x+h) - f(x)] / h</div>`;
+        resultado.innerHTML += `<div class="paso">2️⃣ f(x) = <strong>${fx_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">3️⃣ f(x+h) = <strong>${fxh_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">4️⃣ Diferencia: f(x+h) - f(x) = <strong>${diferencia_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">5️⃣ Cociente: [f(x+h) - f(x)] / h = <strong>${cociente_str}</strong></div>`;
+        resultado.innerHTML += `<div class="paso">6️⃣ Derivada (límite cuando h→0): f'(x) = <strong>${derivada_str}</strong> ✅</div>`;
+
+        // Graficar
+        const expr = math.compile(entrada);
+        const derivExpr = math.compile(derivada_str);
+
+        const xValues = math.range(-10, 10, 0.2).toArray();
+        const yValues = xValues.map(x => expr.evaluate({ x }));
+        const yDerivValues = xValues.map(x => derivExpr.evaluate({ x }));
+
+        const trace1 = {
+          x: xValues,
+          y: yValues,
+          mode: 'lines',
+          name: 'f(x)',
+          line: { width: 3, color: '#6c63ff' }
+        };
+
+        const trace2 = {
+          x: xValues,
+          y: yDerivValues,
+          mode: 'lines',
+          name: "f'(x)",
+          line: { width: 3, dash: 'dot', color: '#ff4081' }
+        };
+
+        const layout = {
+          title: '📈 Gráfica de f(x) y su derivada',
+          xaxis: { title: 'x' },
+          yaxis: { title: 'y' },
+          plot_bgcolor: '#fdfdfd',
+          paper_bgcolor: '#fdfdfd',
+          font: { family: 'Inter, sans-serif', size: 14 }
+        };
+
+        Plotly.newPlot('grafico', [trace1, trace2], layout);
+      } catch (e) {
+        resultado.innerHTML = `<div class="paso error">❌ Error al interpretar la función. Asegúrate de usar solo <strong>x</strong> como variable y una sintaxis válida.</div>`;
+      }
     }
-  }
-</script>
-
+  </script>
 </body>
 </html>
