@@ -1,96 +1,97 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Derivada por Definición (Paso a Paso)</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calculadora de Derivadas Paso a Paso</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
-    input, button { padding: 10px; margin: 10px 0; width: 300px; }
-    #pasos { background: #fff; padding: 15px; border-radius: 5px; }
+    input, button { padding: 10px; font-size: 16px; }
+    #result { margin-top: 20px; background: white; padding: 15px; border-radius: 10px; }
+    .step { margin-bottom: 10px; }
   </style>
 </head>
 <body>
   <h1>Calculadora de Derivadas Paso a Paso</h1>
-  <label>Ingresa la función (ej: 2*x^2):</label><br>
-  <input type="text" id="funcion" value="2*x^2">
-  <br>
+  <p>Ingresa la función (ej: 2*x^2):</p>
+  <input type="text" id="funcionInput" placeholder="Ej: 2*x^2" />
   <button onclick="resolverDerivada()">Resolver Derivada</button>
 
-  <h2>Pasos:</h2>
-  <div id="pasos"></div>
+  <div id="result"></div>
 
   <h2>Gráfica:</h2>
-  <div id="grafica" style="width:100%; height:400px;"></div>
+  <div id="graph" style="height: 400px;"></div>
 
-<script>
-function resolverDerivada() {
-  const fInput = document.getElementById('funcion').value;
-  const pasosDiv = document.getElementById('pasos');
-  pasosDiv.innerHTML = "";
+  <script>
+    function resolverDerivada() {
+      const input = document.getElementById("funcionInput").value;
+      const x = math.parse('x');
+      const delta = math.parse('dx');
 
-  try {
-    const f = math.parse(fInput);
-    const x = math.parse('x');
-    const h = math.parse('h');
+      try {
+        const f = math.parse(input);
 
-    const fx = f.compile();
-    const fxh = math.parse(fInput.replace(/x/g, '(x + h)')).compile();
+        const fx = f.toString();
+        const fxdx = math.simplify(f.transform(node => {
+          if (node.isSymbolNode && node.name === 'x') {
+            return math.parse('(x + dx)');
+          }
+          return node;
+        })).toString();
 
-    const paso1 = `f(x) = ${fInput}`;
+        const paso1 = `Paso 1: f(x) = ${fx}`;
+        const paso2 = `Paso 2: f(x + Δx) = ${fxdx}`;
+        const paso3 = `Paso 3: [f(x + Δx) - f(x)] / Δx = [${fxdx} - (${fx})] / dx`;
 
-    const exprF_x_h = math.parse(fInput.replace(/x/g, '(x + h)'));
-    const paso2 = `f(x + h) = ${exprF_x_h.toString()}`;
+        const diferencia = math.parse(`(${fxdx}) - (${fx})`);
+        const cociente = math.simplify(`((${fxdx}) - (${fx})) / dx`).toString();
+        const paso4 = `Paso 4: Simplificando = ${cociente}`;
 
-    const exprResta = math.simplify(`(${exprF_x_h.toString()}) - (${fInput})`);
-    const paso3 = `f(x + h) - f(x) = ${exprResta.toString()}`;
+        const derivadaFinal = math.simplify(cociente.replace(/dx/g, '0')).toString();
 
-    const exprDiv = math.simplify(`(${exprResta.toString()}) / h`);
-    const paso4 = `(f(x + h) - f(x)) / h = ${exprDiv.toString()}`;
+        const paso5 = `Paso 5: Derivada final = ${math.derivative(f, 'x').toString()}`;
 
-    const derivada = math.simplify(`limit(${exprDiv.toString()}, h, 0)`);
-    const paso5 = `Derivada: f'(x) = ${derivada.toString()}`;
+        const result = [paso1, paso2, paso3, paso4, paso5]
+          .map(paso => `<div class="step">${paso}</div>`)
+          .join("");
 
-    pasosDiv.innerHTML += `<p><b>Paso 1:</b> ${paso1}</p>`;
-    pasosDiv.innerHTML += `<p><b>Paso 2:</b> ${paso2}</p>`;
-    pasosDiv.innerHTML += `<p><b>Paso 3:</b> ${paso3}</p>`;
-    pasosDiv.innerHTML += `<p><b>Paso 4:</b> ${paso4}</p>`;
-    pasosDiv.innerHTML += `<p><b>Paso 5:</b> ${paso5}</p>`;
+        document.getElementById("result").innerHTML = result;
 
-    // Graficar funcion y derivada
-    const fParsed = math.compile(fInput);
-    const dParsed = math.compile(derivada.toString());
+        // Gráfica
+        const fCompiled = math.compile(input);
+        const dCompiled = math.derivative(input, 'x').compile();
+        const xValues = math.range(-10, 10, 0.1).toArray();
+        const yValues = xValues.map(x => fCompiled.evaluate({ x }));
+        const dyValues = xValues.map(x => dCompiled.evaluate({ x }));
 
-    const xs = math.range(-10, 10, 0.1).toArray();
-    const ys = xs.map(x => fParsed.evaluate({x: x}));
-    const dys = xs.map(x => dParsed.evaluate({x: x}));
+        const trace1 = {
+          x: xValues,
+          y: yValues,
+          mode: 'lines',
+          name: 'f(x)',
+          line: { color: 'blue' }
+        };
 
-    const trace1 = {
-      x: xs,
-      y: ys,
-      mode: 'lines',
-      name: 'f(x)',
-      line: { color: 'blue' }
-    };
+        const trace2 = {
+          x: xValues,
+          y: dyValues,
+          mode: 'lines',
+          name: "f'(x)",
+          line: { color: 'red' }
+        };
 
-    const trace2 = {
-      x: xs,
-      y: dys,
-      mode: 'lines',
-      name: "f'(x)",
-      line: { color: 'red', dash: 'dot' }
-    };
+        Plotly.newPlot('graph', [trace1, trace2], {
+          title: 'Función y su derivada',
+          xaxis: { title: 'x' },
+          yaxis: { title: 'y' }
+        });
 
-    Plotly.newPlot('grafica', [trace1, trace2], {
-      title: 'Función y su Derivada',
-      xaxis: { title: 'x' },
-      yaxis: { title: 'y' }
-    });
-  } catch (e) {
-    pasosDiv.innerHTML = '<p style="color:red;">Error al procesar la función. Asegúrate de escribirla correctamente.</p>';
-  }
-}
-</script>
+      } catch (error) {
+        document.getElementById("result").innerHTML = `<span style="color:red;">Error al procesar la función. Asegúrate de escribirla correctamente.</span>`;
+      }
+    }
+  </script>
 </body>
 </html>
