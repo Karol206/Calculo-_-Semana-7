@@ -35,88 +35,87 @@
   <canvas id="grafico" width="600" height="400"></canvas>
 
   <script>
-    function derivadaPasoAPaso(fx) {
-      const pasos = [];
-      pasos.push(`Función original: f(x) = ${fx}`);
-      
-      // Expandir (x + Δx)
-      const fxParsed = math.parse(fx);
-      const variable = 'x';
-      const delta = math.parse(`(${fx})`.replace(/x/g, '(x + dx)'));
+  function derivadaPasoAPaso(fxOriginal) {
+    const pasos = [];
+    const fx = fxOriginal.replace(/\^/g, '**'); // compatibilidad con JS
+    pasos.push(`Paso 1: f(x) = ${fxOriginal}`);
 
-      pasos.push(`Paso 1: Aplicar la definición de derivada:`);
-      pasos.push(`f'(x) = lim dx->0 [f(x + dx) - f(x)] / dx`);
+    // f(x + dx)
+    const fx_dx = fx.replace(/x/g, "(x + dx)");
+    pasos.push(`Paso 2: f(x + dx) = ${fx_dx}`);
 
-      pasos.push(`Paso 2: f(x + dx) = ${delta.toString()}`);
-      pasos.push(`Paso 3: f(x + dx) - f(x) = (${delta.toString()}) - (${fx})`);
+    // Numerador: f(x + dx) - f(x)
+    pasos.push(`Paso 3: Sustituimos en la definición:`);
+    pasos.push(`         [f(x + dx) - f(x)] / dx`);
+    pasos.push(`         = [${fx_dx} - (${fx})] / dx`);
 
-      const num = math.simplify(`(${delta.toString()}) - (${fx})`).toString();
-      pasos.push(`Paso 4: Numerador simplificado: ${num}`);
+    // Simplificación con math.js
+    let numerador, derivada;
 
-      const division = math.simplify(`(${num}) / dx`).toString();
-      pasos.push(`Paso 5: Dividir por dx: (${num}) / dx = ${division}`);
+    try {
+      numerador = math.simplify(`(${fx_dx}) - (${fx})`).toString();
+      pasos.push(`Paso 4: Simplificamos el numerador: ${numerador}`);
 
-      const derivada = math.derivative(fx, variable).toString();
-      pasos.push(`Paso 6: Tomar el límite cuando dx -> 0: f'(x) = ${derivada}`);
+      const division = `(${numerador}) / dx`;
+      pasos.push(`Paso 5: Dividimos por dx: ${division}`);
 
-      return { pasos, derivada };
+      derivada = math.simplify(`(${division})`).toString();
+      pasos.push(`Paso 6: Tomamos el límite cuando dx → 0`);
+      pasos.push(`f'(x) = ${derivada}`);
+    } catch (e) {
+      pasos.push('⚠️ Error al procesar la función. Verifica la sintaxis.');
+      derivada = 'Error';
     }
 
-    function resolverDerivada() {
-      const funcion = document.getElementById("funcion").value;
-      const { pasos, derivada } = derivadaPasoAPaso(funcion);
+    return { pasos, derivada };
+  }
 
-      document.getElementById("pasos").innerText = pasos.join("\n");
+  function resolverDerivada() {
+    const funcion = document.getElementById("funcion").value;
+    const { pasos, derivada } = derivadaPasoAPaso(funcion);
+
+    document.getElementById("pasos").innerText = pasos.join("\\n");
+
+    if (derivada !== 'Error') {
       graficar(funcion, derivada);
     }
+  }
 
-    function graficar(funcion, derivada) {
-      const ctx = document.getElementById('grafico').getContext('2d');
-      const xVals = math.range(-10, 10, 0.1).toArray();
-      const f = math.compile(funcion);
-      const df = math.compile(derivada);
+  function graficar(funcion, derivada) {
+    const ctx = document.getElementById('grafico').getContext('2d');
+    const xVals = math.range(-10, 10, 0.1).toArray();
+    const f = math.compile(funcion.replace(/\^/g, '**'));
+    const df = math.compile(derivada.replace(/\^/g, '**'));
 
-      const yVals = xVals.map(x => f.evaluate({x}));
-      const dyVals = xVals.map(x => df.evaluate({x}));
+    const yVals = xVals.map(x => f.evaluate({x}));
+    const dyVals = xVals.map(x => df.evaluate({x}));
 
-      new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: xVals,
-          datasets: [
-            {
-              label: 'f(x)',
-              data: yVals,
-              borderColor: 'blue',
-              fill: false
-            },
-            {
-              label: "f'(x)",
-              data: dyVals,
-              borderColor: 'red',
-              fill: false
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: {
-              title: {
-                display: true,
-                text: 'x'
-              }
-            },
-            y: {
-              title: {
-                display: true,
-                text: 'f(x), f\'(x)'
-              }
-            }
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: xVals,
+        datasets: [
+          {
+            label: 'f(x)',
+            data: yVals,
+            borderColor: 'blue',
+            fill: false
+          },
+          {
+            label: \"f'(x)\",
+            data: dyVals,
+            borderColor: 'red',
+            fill: false
           }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { title: { display: true, text: 'x' } },
+          y: { title: { display: true, text: 'f(x), f\\'(x)' } }
         }
-      });
-    }
-  </script>
-</body>
-</html>
+      }
+    });
+  }
+</script>
