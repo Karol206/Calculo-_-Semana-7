@@ -1,117 +1,117 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Derivadas Paso a Paso</title>
+  <meta charset="UTF-8">
+  <title>Calculadora de Derivadas Paso a Paso</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      font-family: Arial;
+      font-family: Arial, sans-serif;
       padding: 20px;
-      background: #f9f9f9;
+      background-color: #f4f4f4;
     }
     input, button {
+      font-size: 1rem;
       padding: 10px;
-      font-size: 16px;
+      margin-top: 10px;
     }
-    #steps {
-      margin-top: 20px;
-      background: white;
-      padding: 20px;
+    pre {
+      background-color: #fff;
+      padding: 15px;
       border-radius: 10px;
-      white-space: pre-line;
+      overflow-x: auto;
     }
   </style>
 </head>
 <body>
-  <h1>Derivada usando la definición (paso a paso)</h1>
-  <label>Ingresa una función (por ejemplo: 2*x^2):</label><br>
-  <input type="text" id="funcion" placeholder="Ej: 2*x^2" size="30">
-  <button onclick="resolver()">Resolver</button>
-
-  <div id="steps"></div>
-
-  <canvas id="grafica" width="600" height="400"></canvas>
+  <h1>Calculadora de Derivadas Paso a Paso</h1>
+  <label for="funcion">Ingresa la función (ej: 2x^2):</label><br>
+  <input type="text" id="funcion" placeholder="Ej: 2x^2"><br>
+  <button onclick="resolverDerivada()">Resolver Derivada</button>
+  <h2>Pasos:</h2>
+  <pre id="pasos"></pre>
+  <h2>Gráfica:</h2>
+  <canvas id="grafico" width="600" height="400"></canvas>
 
   <script>
-    function resolver() {
-      const input = document.getElementById("funcion").value;
-      const steps = document.getElementById("steps");
-      steps.innerHTML = "";
+    function derivadaPasoAPaso(fx) {
+      const pasos = [];
+      pasos.push(`Función original: f(x) = ${fx}`);
+      
+      // Expandir (x + Δx)
+      const fxParsed = math.parse(fx);
+      const variable = 'x';
+      const delta = math.parse(`(${fx})`.replace(/x/g, '(x + dx)'));
 
-      try {
-        const f_x = math.parse(input);  // f(x)
-        const f_x_str = f_x.toString();
+      pasos.push(`Paso 1: Aplicar la definición de derivada:`);
+      pasos.push(`f'(x) = lim dx->0 [f(x + dx) - f(x)] / dx`);
 
-        // Paso 1: f(x)
-        steps.innerHTML += `Paso 1: f(x) = ${f_x_str}\n`;
+      pasos.push(`Paso 2: f(x + dx) = ${delta.toString()}`);
+      pasos.push(`Paso 3: f(x + dx) - f(x) = (${delta.toString()}) - (${fx})`);
 
-        // Paso 2: f(x+h)
-        const xph = math.simplify(input.replace(/x/g, "(x + h)")).toString();
-        steps.innerHTML += `Paso 2: f(x + h) = ${xph}\n`;
+      const num = math.simplify(`(${delta.toString()}) - (${fx})`).toString();
+      pasos.push(`Paso 4: Numerador simplificado: ${num}`);
 
-        // Paso 3: f(x + h) - f(x)
-        const diferencia = math.simplify(`(${xph}) - (${f_x_str})`).toString();
-        steps.innerHTML += `Paso 3: f(x + h) - f(x) = ${diferencia}\n`;
+      const division = math.simplify(`(${num}) / dx`).toString();
+      pasos.push(`Paso 5: Dividir por dx: (${num}) / dx = ${division}`);
 
-        // Paso 4: Cociente [f(x + h) - f(x)] / h
-        const cociente = math.simplify(`(${diferencia}) / h`).toString();
-        steps.innerHTML += `Paso 4: Cociente = (${diferencia}) / h = ${cociente}\n`;
+      const derivada = math.derivative(fx, variable).toString();
+      pasos.push(`Paso 6: Tomar el límite cuando dx -> 0: f'(x) = ${derivada}`);
 
-        // Paso 5: Límite cuando h → 0
-        const derivada = math.derivative(input, 'x').toString();
-        steps.innerHTML += `Paso 5: Derivada final (lim h→0) = ${derivada}\n`;
-
-        // Graficar
-        graficarFunciones(input, derivada);
-      } catch (error) {
-        steps.innerHTML = "⚠️ Error en la función. Asegúrate de escribirla correctamente.";
-      }
+      return { pasos, derivada };
     }
 
-    function graficarFunciones(fx, dfx) {
-      const ctx = document.getElementById("grafica").getContext("2d");
+    function resolverDerivada() {
+      const funcion = document.getElementById("funcion").value;
+      const { pasos, derivada } = derivadaPasoAPaso(funcion);
 
-      const f = math.compile(fx);
-      const df = math.compile(dfx);
+      document.getElementById("pasos").innerText = pasos.join("\n");
+      graficar(funcion, derivada);
+    }
 
-      const labels = [];
-      const datosF = [];
-      const datosDF = [];
+    function graficar(funcion, derivada) {
+      const ctx = document.getElementById('grafico').getContext('2d');
+      const xVals = math.range(-10, 10, 0.1).toArray();
+      const f = math.compile(funcion);
+      const df = math.compile(derivada);
 
-      for (let x = -10; x <= 10; x += 0.5) {
-        labels.push(x.toFixed(1));
-        datosF.push(f.evaluate({ x }));
-        datosDF.push(df.evaluate({ x }));
-      }
+      const yVals = xVals.map(x => f.evaluate({x}));
+      const dyVals = xVals.map(x => df.evaluate({x}));
 
       new Chart(ctx, {
-        type: "line",
+        type: 'line',
         data: {
-          labels: labels,
+          labels: xVals,
           datasets: [
             {
-              label: "f(x)",
-              data: datosF,
-              borderColor: "blue",
+              label: 'f(x)',
+              data: yVals,
+              borderColor: 'blue',
               fill: false
             },
             {
               label: "f'(x)",
-              data: datosDF,
-              borderColor: "red",
+              data: dyVals,
+              borderColor: 'red',
               fill: false
             }
           ]
         },
         options: {
           responsive: true,
-          plugins: {
-            legend: { position: "top" },
-            title: {
-              display: true,
-              text: "Función y su derivada"
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: 'x'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'f(x), f\'(x)'
+              }
             }
           }
         }
