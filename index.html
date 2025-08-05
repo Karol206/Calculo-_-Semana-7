@@ -3,119 +3,116 @@
 <head>
   <meta charset="UTF-8">
   <title>Calculadora de Derivadas Paso a Paso</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f4f4f4;
-    }
-    input, button {
-      font-size: 1rem;
-      padding: 10px;
-      margin-top: 10px;
-    }
-    pre {
-      background-color: #fff;
-      padding: 15px;
-      border-radius: 10px;
-      overflow-x: auto;
-    }
+    body { font-family: Arial; background-color: #f2f2f2; padding: 20px; }
+    input, button { padding: 10px; margin-top: 10px; font-size: 16px; }
+    #pasos { background: #fff; padding: 10px; border-radius: 8px; white-space: pre-line; }
+    canvas { background: #fff; border: 1px solid #ccc; margin-top: 20px; }
   </style>
 </head>
 <body>
-  <h1>Calculadora de Derivadas Paso a Paso</h1>
-  <label for="funcion">Ingresa la función (ej: 2x^2):</label><br>
-  <input type="text" id="funcion" placeholder="Ej: 2x^2"><br>
+  <h2>Calculadora de Derivadas Paso a Paso</h2>
+  <label>Ingresa la función (ej: 2*x^2):</label><br>
+  <input type="text" id="funcion" value="2*x^2"><br>
   <button onclick="resolverDerivada()">Resolver Derivada</button>
-  <h2>Pasos:</h2>
-  <pre id="pasos"></pre>
-  <h2>Gráfica:</h2>
+
+  <h3>Pasos:</h3>
+  <div id="pasos"></div>
+
+  <h3>Gráfica:</h3>
   <canvas id="grafico" width="600" height="400"></canvas>
 
   <script>
-  function derivadaPasoAPaso(fxOriginal) {
-    const pasos = [];
-    const fx = fxOriginal.replace(/\^/g, '**'); // compatibilidad con JS
-    pasos.push(`Paso 1: f(x) = ${fxOriginal}`);
+    function derivadaPasoAPaso(fxOriginal) {
+      const pasos = [];
+      const fx = fxOriginal.replace(/\^/g, '**');
+      pasos.push(`Paso 1: f(x) = ${fxOriginal}`);
 
-    // f(x + dx)
-    const fx_dx = fx.replace(/x/g, "(x + dx)");
-    pasos.push(`Paso 2: f(x + dx) = ${fx_dx}`);
+      const fx_dx = fx.replace(/x/g, '(x + dx)');
+      pasos.push(`Paso 2: f(x + dx) = ${fx_dx}`);
 
-    // Numerador: f(x + dx) - f(x)
-    pasos.push(`Paso 3: Sustituimos en la definición:`);
-    pasos.push(`         [f(x + dx) - f(x)] / dx`);
-    pasos.push(`         = [${fx_dx} - (${fx})] / dx`);
+      pasos.push(`Paso 3: Sustituimos en la definición de derivada:`);
+      pasos.push(`         [f(x + dx) - f(x)] / dx`);
+      pasos.push(`         = [${fx_dx} - (${fx})] / dx`);
 
-    // Simplificación con math.js
-    let numerador, derivada;
+      let numerador, derivada;
+      try {
+        numerador = math.simplify(`(${fx_dx}) - (${fx})`).toString();
+        pasos.push(`Paso 4: Simplificamos el numerador:`);
+        pasos.push(`         ${numerador}`);
 
-    try {
-      numerador = math.simplify(`(${fx_dx}) - (${fx})`).toString();
-      pasos.push(`Paso 4: Simplificamos el numerador: ${numerador}`);
+        const division = `(${numerador}) / dx`;
+        pasos.push(`Paso 5: Dividimos por dx:`);
+        pasos.push(`         ${division}`);
 
-      const division = `(${numerador}) / dx`;
-      pasos.push(`Paso 5: Dividimos por dx: ${division}`);
-
-      derivada = math.simplify(`(${division})`).toString();
-      pasos.push(`Paso 6: Tomamos el límite cuando dx → 0`);
-      pasos.push(`f'(x) = ${derivada}`);
-    } catch (e) {
-      pasos.push('⚠️ Error al procesar la función. Verifica la sintaxis.');
-      derivada = 'Error';
-    }
-
-    return { pasos, derivada };
-  }
-
-  function resolverDerivada() {
-    const funcion = document.getElementById("funcion").value;
-    const { pasos, derivada } = derivadaPasoAPaso(funcion);
-
-    document.getElementById("pasos").innerText = pasos.join("\\n");
-
-    if (derivada !== 'Error') {
-      graficar(funcion, derivada);
-    }
-  }
-
-  function graficar(funcion, derivada) {
-    const ctx = document.getElementById('grafico').getContext('2d');
-    const xVals = math.range(-10, 10, 0.1).toArray();
-    const f = math.compile(funcion.replace(/\^/g, '**'));
-    const df = math.compile(derivada.replace(/\^/g, '**'));
-
-    const yVals = xVals.map(x => f.evaluate({x}));
-    const dyVals = xVals.map(x => df.evaluate({x}));
-
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: xVals,
-        datasets: [
-          {
-            label: 'f(x)',
-            data: yVals,
-            borderColor: 'blue',
-            fill: false
-          },
-          {
-            label: \"f'(x)\",
-            data: dyVals,
-            borderColor: 'red',
-            fill: false
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          x: { title: { display: true, text: 'x' } },
-          y: { title: { display: true, text: 'f(x), f\\'(x)' } }
-        }
+        derivada = math.simplify(division).toString();
+        pasos.push(`Paso 6: Límite cuando dx → 0:`);
+        pasos.push(`         f'(x) = ${derivada}`);
+      } catch (e) {
+        pasos.push("❌ Error: Verifica que tu función esté bien escrita.");
+        derivada = 'Error';
       }
-    });
-  }
-</script>
+
+      return { pasos, derivada };
+    }
+
+    function resolverDerivada() {
+      const funcion = document.getElementById("funcion").value;
+      const { pasos, derivada } = derivadaPasoAPaso(funcion);
+      document.getElementById("pasos").innerText = pasos.join("\n");
+
+      if (derivada !== 'Error') {
+        graficar(funcion, derivada);
+      }
+    }
+
+    function graficar(funcion, derivada) {
+      const ctx = document.getElementById('grafico').getContext('2d');
+      const xVals = math.range(-10, 10, 0.2).toArray();
+
+      let f, df;
+      try {
+        f = math.compile(funcion);
+        df = math.compile(derivada);
+      } catch (e) {
+        return;
+      }
+
+      const yVals = xVals.map(x => f.evaluate({x}));
+      const dyVals = xVals.map(x => df.evaluate({x}));
+
+      if (window.chart) window.chart.destroy(); // borra la gráfica anterior
+
+      window.chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: xVals,
+          datasets: [
+            {
+              label: 'f(x)',
+              data: yVals,
+              borderColor: 'blue',
+              fill: false
+            },
+            {
+              label: "f'(x)",
+              data: dyVals,
+              borderColor: 'red',
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: { title: { display: true, text: 'x' } },
+            y: { title: { display: true, text: 'Valor' } }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
