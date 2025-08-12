@@ -5,63 +5,128 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MUEBLEA - Muebles Personalizados</title>
     <style>
-        body {font-family: Arial, sans-serif;margin: 0;padding: 0;background-color: #f9f9f9;}
-        header {background-color: #5a4634;color: white;padding: 20px;text-align: center;}
-        header img {height: 60px;}
-        nav {background-color: #7a5c44;padding: 10px;text-align: center;}
-        nav a {color: white;margin: 0 15px;text-decoration: none;}
-        section {padding: 20px;}
-        .productos {display: grid;grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));gap: 20px;}
-        .producto {background-color: white;border-radius: 8px;box-shadow: 0 2px 5px rgba(0,0,0,0.1);padding: 15px;text-align: center;}
-        .producto img {width: 100%;border-radius: 8px;}
-        footer {background-color: #5a4634;color: white;text-align: center;padding: 10px;}
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        header {
+            background-color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        header img {
+            height: 50px;
+        }
+        nav a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #444;
+            font-weight: bold;
+        }
+        nav a:hover {
+            color: #d4a373;
+        }
+        .hero {
+            text-align: center;
+            padding: 50px 20px;
+            background-color: #fffaf4;
+        }
+        .hero h1 {
+            font-size: 2.5em;
+            color: #b35a1f;
+        }
+        .productos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 40px;
+        }
+        .producto {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            text-align: center;
+        }
+        .producto img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .producto h3 {
+            margin: 15px 0 5px;
+        }
+        .producto p {
+            color: #777;
+            padding: 0 10px;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #b35a1f;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin: 15px 0;
+            text-decoration: none;
+        }
+        .btn:hover {
+            background-color: #8f4318;
+        }
+        footer {
+            background: #fffaf4;
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
-    <header>
-        <img src="MUEBLEA_logo.png" alt="MUEBLEA Logo">
-        <h1>MUEBLEA</h1>
-        <p>Conectando artesanos locales con clientes únicos</p>
-    </header>
+
+<header>
+    <img src="https://raw.githubusercontent.com/tuusuario/tu-repo/main/logo-mueblea.png" alt="MUEBLEA">
     <nav>
-        <a href="#explorar">Explorar</a>
-        <a href="#personalizar">Personalizar</a>
-        <a href="#cotizacion">Cotización</a>
-        <a href="#seguimiento">Seguimiento</a>
-        <a href="#comunidad">Comunidad</a>
+        <a href="#productos">Productos</a>
+        <a href="#artesanos">Artesanos</a>
+        <a href="#contacto">Contacto</a>
     </nav>
-    <section id="explorar">
-        <h2>Explora nuestros muebles</h2>
-        <div class="productos">
-            <div class="producto">
-                <img src="https://via.placeholder.com/300x200" alt="Mueble 1">
-                <h3>Silla artesanal</h3>
-                <p>Hecha a mano con madera local.</p>
-            </div>
-            <div class="producto">
-                <img src="https://via.placeholder.com/300x200" alt="Mueble 2">
-                <h3>Mesa de comedor</h3>
-                <p>Personalizable en tamaño, color y acabado.</p>
-            </div>
-            <div class="producto">
-                <img src="https://via.placeholder.com/300x200" alt="Mueble 3">
-                <h3>Estantería moderna</h3>
-                <p>Diseño minimalista para cualquier espacio.</p>
-            </div>
-        </div>
-    </section>
-    <section id="cotizacion">
-        <h2>Obtén tu cotización</h2>
-        <form>
-            <label>Tipo de mueble: <input type="text" name="tipo"></label><br><br>
-            <label>Medidas: <input type="text" name="medidas"></label><br><br>
-            <label>Material: <input type="text" name="material"></label><br><br>
-            <label>Color: <input type="text" name="color"></label><br><br>
-            <button type="submit">Calcular precio</button>
-        </form>
-    </section>
-    <footer>
-        <p>&copy; 2025 MUEBLEA. Todos los derechos reservados.</p>
-    </footer>
+</header>
+
+<section class="hero">
+    <h1>Muebles personalizados, hechos con amor por artesanos locales</h1>
+    <p>Explora, personaliza y recibe en casa tu mueble soñado.</p>
+    <a href="#productos" class="btn">Ver productos</a>
+</section>
+
+<section id="productos" class="productos">
+    <div class="producto">
+        <img src="https://images.unsplash.com/photo-1598300053650-9143ba1e0d06?w=800" alt="Silla artesanal">
+        <h3>Silla artesanal</h3>
+        <p>Madera maciza, acabado natural.</p>
+        <a href="#" class="btn">Personalizar</a>
+    </div>
+    <div class="producto">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800" alt="Mesa de comedor">
+        <h3>Mesa de comedor</h3>
+        <p>Diseño moderno y elegante.</p>
+        <a href="#" class="btn">Personalizar</a>
+    </div>
+    <div class="producto">
+        <img src="https://images.unsplash.com/photo-1628744448884-cd6bde7edc62?w=800" alt="Estantería moderna">
+        <h3>Estantería moderna</h3>
+        <p>Ideal para espacios minimalistas.</p>
+        <a href="#" class="btn">Personalizar</a>
+    </div>
+</section>
+
+<footer>
+    <p>&copy; 2025 MUEBLEA - Todos los derechos reservados</p>
+</footer>
+
 </body>
 </html>
