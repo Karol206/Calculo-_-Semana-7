@@ -3,89 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Muebles Colaborativos</title>
+    <title>MUEBLEA - Muebles Personalizados</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-        header {
-            background-color: #3a3a3a;
-            color: white;
-            padding: 1em;
-            text-align: center;
-        }
-        nav a {
-            color: white;
-            margin: 0 1em;
-            text-decoration: none;
-        }
-        main {
-            padding: 2em;
-        }
-        section {
-            background: white;
-            margin-bottom: 2em;
-            padding: 1em;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        button {
-            background-color: #3a3a3a;
-            color: white;
-            padding: 0.5em 1em;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #555;
-        }
-        img {
-            max-width: 100%;
-            border-radius: 8px;
-            margin-top: 1em;
-        }
+        body {font-family: Arial, sans-serif;margin: 0;padding: 0;background-color: #f9f9f9;}
+        header {background-color: #5a4634;color: white;padding: 20px;text-align: center;}
+        header img {height: 60px;}
+        nav {background-color: #7a5c44;padding: 10px;text-align: center;}
+        nav a {color: white;margin: 0 15px;text-decoration: none;}
+        section {padding: 20px;}
+        .productos {display: grid;grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));gap: 20px;}
+        .producto {background-color: white;border-radius: 8px;box-shadow: 0 2px 5px rgba(0,0,0,0.1);padding: 15px;text-align: center;}
+        .producto img {width: 100%;border-radius: 8px;}
+        footer {background-color: #5a4634;color: white;text-align: center;padding: 10px;}
     </style>
 </head>
 <body>
     <header>
-        <h1>Muebles Colaborativos</h1>
-        <nav>
-            <a href="#explorar">Explorar</a>
-            <a href="#cotizacion">Cotización</a>
-            <a href="#pedido">Pedido</a>
-            <a href="#comunidad">Comunidad</a>
-        </nav>
+        <img src="MUEBLEA_logo.png" alt="MUEBLEA Logo">
+        <h1>MUEBLEA</h1>
+        <p>Conectando artesanos locales con clientes únicos</p>
     </header>
-    <main>
-        <section id="explorar">
-            <h2>Explorar modelos</h2>
-            <p>Descubre nuestros modelos de muebles y personaliza según tus necesidades.</p>
-            <img src="https://via.placeholder.com/600x400?text=Modelo+de+Mueble+1" alt="Modelo de Mueble 1">
-            <img src="https://via.placeholder.com/600x400?text=Modelo+de+Mueble+2" alt="Modelo de Mueble 2">
-        </section>
-        <section id="cotizacion">
-            <h2>Obtener Cotización</h2>
-            <label>Medidas:</label><input type="text"><br>
-            <label>Material:</label><input type="text"><br>
-            <label>Color:</label><input type="text"><br>
-            <button>Calcular</button>
-            <img src="https://via.placeholder.com/600x400?text=Ejemplo+de+Material" alt="Ejemplo de Material">
-        </section>
-        <section id="pedido">
-            <h2>Seguimiento de Pedido</h2>
-            <p>Estado: En producción</p>
-            <img src="https://via.placeholder.com/600x400?text=Seguimiento+del+Pedido" alt="Seguimiento del Pedido">
-        </section>
-        <section id="comunidad">
-            <h2>Comunidad</h2>
-            <p>Comparte ideas y experiencias con otros usuarios y artesanos.</p>
-            <img src="https://via.placeholder.com/600x400?text=Comunidad+Digital" alt="Comunidad Digital">
-        </section>
-    </main>
+    <nav>
+        <a href="#explorar">Explorar</a>
+        <a href="#personalizar">Personalizar</a>
+        <a href="#cotizacion">Cotización</a>
+        <a href="#seguimiento">Seguimiento</a>
+        <a href="#comunidad">Comunidad</a>
+    </nav>
+    <section id="explorar">
+        <h2>Explora nuestros muebles</h2>
+        <div class="productos">
+            <div class="producto">
+                <img src="https://via.placeholder.com/300x200" alt="Mueble 1">
+                <h3>Silla artesanal</h3>
+                <p>Hecha a mano con madera local.</p>
+            </div>
+            <div class="producto">
+                <img src="https://via.placeholder.com/300x200" alt="Mueble 2">
+                <h3>Mesa de comedor</h3>
+                <p>Personalizable en tamaño, color y acabado.</p>
+            </div>
+            <div class="producto">
+                <img src="https://via.placeholder.com/300x200" alt="Mueble 3">
+                <h3>Estantería moderna</h3>
+                <p>Diseño minimalista para cualquier espacio.</p>
+            </div>
+        </div>
+    </section>
+    <section id="cotizacion">
+        <h2>Obtén tu cotización</h2>
+        <form>
+            <label>Tipo de mueble: <input type="text" name="tipo"></label><br><br>
+            <label>Medidas: <input type="text" name="medidas"></label><br><br>
+            <label>Material: <input type="text" name="material"></label><br><br>
+            <label>Color: <input type="text" name="color"></label><br><br>
+            <button type="submit">Calcular precio</button>
+        </form>
+    </section>
+    <footer>
+        <p>&copy; 2025 MUEBLEA. Todos los derechos reservados.</p>
+    </footer>
 </body>
 </html>
